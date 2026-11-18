@@ -5,6 +5,8 @@ on:
     branches:
       - refactor/react-migration
       - feature/hero-fridge-video
+      - deploy/nordix-pages
+      - main
   workflow_dispatch:
 
 permissions:
