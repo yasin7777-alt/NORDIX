@@ -1,0 +1,112 @@
+<!-- INTERACTIVE LEARNING PATH CALCULATOR -->
+  <section id="calculator" class="py-24 sm:py-32 px-4 sm:px-8 bg-n100">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="reveal-up max-w-4xl mb-14">
+        <span class="inline-block text-xs font-display font-bold uppercase tracking-widest text-accent mb-3">
+          [ 03 // ИНТЕРАКТИВНЫЙ КОНСТРУКТОР ]
+        </span>
+        <h2 class="section-mega font-display font-black uppercase text-n900">
+          НАСТРОЙ СВОЙ<br/><span class="text-accent">ТЕМП УЧЁБЫ</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Controls -->
+        <div class="lg:col-span-7 p-8 sm:p-12 rounded-[2.5rem] bg-n300 border border-n500 flex flex-col justify-between reveal-up">
+          <div class="space-y-10">
+            <!-- Goal Selector -->
+            <div>
+              <label class="block font-display font-bold text-sm uppercase tracking-wider text-n800 mb-4">
+                1. Что хочешь подтянуть?
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="calc-roles">
+                <button data-role="Холодильные системы" data-salary="Холод" data-months="9" class="role-btn active p-4 rounded-2xl border-2 border-accent bg-n0 text-left transition-all">
+                  <div class="font-display font-bold text-sm text-n900">Холодильные системы</div>
+                  <div class="text-xs font-bold text-accent mt-1">Цикл и оборудование</div>
+                </button>
+                <button data-role="Электромонтаж" data-salary="Электрика" data-months="7" class="role-btn p-4 rounded-2xl border-2 border-n500 bg-n200 hover:bg-n0 text-left transition-all">
+                  <div class="font-display font-bold text-sm text-n900">Электромонтаж</div>
+                  <div class="text-xs font-bold text-n700 mt-1">Схемы и управление</div>
+                </button>
+                <button data-role="Компрессоры" data-salary="Механика" data-months="8" class="role-btn p-4 rounded-2xl border-2 border-n500 bg-n200 hover:bg-n0 text-left transition-all">
+                  <div class="font-display font-bold text-sm text-n900">Компрессоры</div>
+                  <div class="text-xs font-bold text-n700 mt-1">Устройство и обслуживание</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Hours Slider -->
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <label for="hours-range" class="font-display font-bold text-sm uppercase tracking-wider text-n800">
+                  2. Часов на изучение в неделю
+                </label>
+                <span id="hours-display" class="font-display font-black text-3xl text-accent">12 ч / нед</span>
+              </div>
+              <input 
+                id="hours-range" 
+                type="range" 
+                min="6" 
+                max="25" 
+                value="12" 
+                class="w-full h-3 bg-n500 rounded-lg appearance-none cursor-pointer accent-accent"
+              />
+              <div class="flex justify-between text-xs font-bold text-n700 mt-2">
+                <span>6 ч (Спокойный темп)</span>
+                <span>15 ч (Оптимально)</span>
+                <span>25 ч (Плотный темп)</span>
+              </div>
+            </div>
+
+            <!-- Starting Level -->
+            <div>
+              <label class="block font-display font-bold text-sm uppercase tracking-wider text-n800 mb-4">
+                3. Ваш текущий уровень
+              </label>
+              <div class="inline-flex rounded-2xl bg-n400 p-1.5 border border-n500" id="level-tabs">
+                <button data-mult="1" class="lvl-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-n900 text-n0 transition-all">С нуля</button>
+                <button data-mult="0.75" class="lvl-btn px-5 py-2.5 rounded-xl font-bold text-sm text-n800 transition-all">Есть база</button>
+                <button data-mult="0.55" class="lvl-btn px-5 py-2.5 rounded-xl font-bold text-sm text-n800 transition-all">Есть практика</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Result Output Card -->
+        <div class="lg:col-span-5 p-8 sm:p-12 rounded-[2.5rem] bg-accent text-n0 flex flex-col justify-between relative overflow-hidden reveal-scale">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-n900/25 text-xs font-display font-bold uppercase tracking-wider">
+              Условный план повторения
+            </div>
+            <h3 id="res-role" class="mt-6 font-display font-black text-3xl sm:text-4xl uppercase">
+              Холодильные системы
+            </h3>
+
+            <div class="mt-8 space-y-6 border-y border-n0/20 py-6">
+              <div>
+                <div class="text-sm font-bold text-n100/80 uppercase">Ориентир для повторения тем</div>
+                <div id="res-duration" class="font-display font-black text-5xl sm:text-6xl mt-1 transition-all">
+                  7.5 мес.
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-xs font-bold text-n100/80 uppercase">Учебных разборов</div>
+                  <div id="res-projects" class="font-display font-black text-2xl sm:text-3xl mt-1">9 разборов</div>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-n100/80 uppercase">Твой фокус</div>
+                  <div id="res-salary" class="font-display font-black text-2xl sm:text-3xl mt-1">Холод</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="openEnrollModal('Персональный план: ' + document.getElementById('res-role').innerText)" class="mt-8 w-full py-5 rounded-full bg-n0 text-n900 hover:bg-n900 hover:text-n0 font-display font-bold text-sm uppercase tracking-wider transition-all shadow-xl flex items-center justify-center gap-3">
+            <span>Посмотреть этот план</span>
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
