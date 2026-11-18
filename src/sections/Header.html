@@ -1,0 +1,42 @@
+<!-- Sticky Navigation Header -->
+  <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-n100/85 backdrop-blur-xl border-b border-n500/60">
+    <div class="nav-shell max-w-[1600px] mx-auto px-4 sm:px-8 h-20 sm:h-24 flex items-center justify-between">
+      <!-- Brand with undistorted logo -->
+      <a href="#hero" data-transition="ГЛАВНАЯ" class="nav-brand nav-transition flex items-center gap-3.5 group">
+        <div class="bg-n900 px-3.5 py-2 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
+          <img 
+            src="https://www.designarena.ai/u/7aac2bcc-cf37-4e59-97c7-bbe3985cf939" 
+            alt="NORDIX" 
+            class="h-7 sm:h-8 w-auto object-contain block"
+          />
+        </div>
+        <span class="nav-wordmark font-display font-black text-xl sm:text-2xl tracking-tight text-n900">
+          NORDIX
+        </span>
+      </a>
+
+      <!-- Desktop Menu -->
+      <nav class="nav-links hidden lg:flex items-center gap-9" aria-label="Основная навигация">
+        <a href="#directions" data-transition="ПРОГРАММЫ" class="nav-transition text-base font-bold text-n800 hover:text-accent transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-accent hover:after:w-full after:transition-all">Программы</a>
+        <a href="#manifesto" data-transition="МЕТОДОЛОГИЯ" class="nav-transition text-base font-bold text-n800 hover:text-accent transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-accent hover:after:w-full after:transition-all">Методология</a>
+        <a href="#calculator" data-transition="ТРАЕКТОРИЯ" class="nav-transition text-base font-bold text-n800 hover:text-accent transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-accent hover:after:w-full after:transition-all">Траектория</a>
+        <a href="#faq" data-transition="ВОПРОСЫ" class="nav-transition text-base font-bold text-n800 hover:text-accent transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-accent hover:after:w-full after:transition-all">FAQ</a>
+      </nav>
+
+      <!-- Actions -->
+      <div class="nav-actions hidden lg:flex items-center gap-4">
+        <button onclick="openEnrollModal('Бесплатная консультация')" class="px-5 py-3 rounded-full border-2 border-n500 font-bold text-sm text-n900 hover:border-n900 transition-all">
+          Учебный план
+        </button>
+        <button onclick="openEnrollModal('Изучение специальности')" class="mag-btn px-6 py-3.5 rounded-full bg-accent hover:bg-semantic text-n0 font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-accent/25">
+          <span>Начать учиться</span>
+          <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Hamburger -->
+      <button id="mobile-menu-btn" aria-label="Открыть меню" class="lg:hidden w-12 h-12 rounded-2xl bg-n300 border border-n500 flex items-center justify-center text-n900">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+    </div>
+  </header>
