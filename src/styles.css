@@ -297,3 +297,84 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
     }
   
+
+/* Right-hand refrigerator film on the landing screen, aligned to the marked-up
+   area from the reference. No frame, controls, or interference with buttons. */
+.nordix-hero-video {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: min(36vw, 650px);
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+}
+.nordix-hero-video-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border: none;
+  background: transparent;
+  mix-blend-mode: multiply;
+}
+@media (min-width: 1180px) {
+  #hero .hero-layout {
+    padding-right: min(36vw, 650px);
+    min-height: min(68vh, 660px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  #hero .hero-title {
+    font-size: clamp(44px, 4.25vw, 82px);
+    letter-spacing: -.045em;
+  }
+  #hero .hero-title > span:last-child {
+    white-space: normal;
+  }
+  #hero .hero-intro {
+    max-width: 100%;
+  }
+  #hero .hero-intro > .reveal-up {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(14px, 2.1vw, 36px);
+  }
+  #hero .hero-intro p {
+    flex: 1 1 320px;
+  }
+  #hero .hero-intro p + div {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 1179px) {
+  .nordix-hero-video {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-height: 560px;
+    margin: 28px auto 0;
+  }
+  #hero .hero-title > span:last-child {
+    white-space: normal;
+  }
+}
+@media (max-width: 600px) {
+  .nordix-hero-video {
+    margin-top: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nordix-hero-video-player {
+    /* Video stays visible, but users can still pause motion via OS/browser. */
+    animation: none;
+  }
+}
