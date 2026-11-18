@@ -7,6 +7,7 @@ on:
       - feature/hero-fridge-video
       - deploy/nordix-pages
       - main
+      - feature/fullscreen-hero-video
   workflow_dispatch:
 
 permissions:
