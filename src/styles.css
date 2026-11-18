@@ -352,12 +352,16 @@
   /* The original full-width heading covered the refrigerator. Keep every
      existing word, but group the copy on the empty LEFT side of the film. */
   #hero .hero-status {
-    max-width: min(57vw, 920px);
+    max-width: min(57vw, 950px);
+  }
+  #hero .hero-status span.text-n800 {
+    font-size: 15px;
+    line-height: 1.5;
   }
   #hero .hero-title {
     width: max-content;
-    max-width: min(55vw, 940px);
-    font-size: clamp(38px, 3.5vw, 67px);
+    max-width: min(55vw, 1020px);
+    font-size: clamp(43px, 4.2vw, 80px);
     line-height: 1.07;
     letter-spacing: -.045em;
   }
@@ -380,8 +384,8 @@
     display: block;
   }
   #hero .hero-intro p {
-    max-width: 560px;
-    font-size: clamp(15px, 1.05vw, 18px);
+    max-width: 620px;
+    font-size: clamp(18px, 1.15vw, 22px);
     line-height: 1.55;
   }
   #hero .hero-intro p + div {
@@ -392,12 +396,12 @@
   }
   #hero .hero-intro a,
   #hero .hero-intro button {
-    font-size: 11px;
-    padding: 14px 18px;
+    font-size: 13px;
+    padding: 16px 22px;
   }
 }
 @media (max-width: 1023px) {
-  #hero .hero-title { font-size: 6.4vw; }
+  #hero .hero-title { font-size: 7.1vw; }
   #hero .hero-title > span:last-child { white-space: normal; }
   #hero .hero-intro > .reveal-up { display: block; }
   #hero .hero-intro p + div { flex-wrap: wrap; }
@@ -407,7 +411,7 @@
   }
 }
 @media (max-width: 600px) {
-  #hero .hero-title { font-size: 6.3vw; }
+  #hero .hero-title { font-size: 6.9vw; }
   /* Portrait screens cannot display a 16:9 frame edge-to-edge without
      letterboxing or cropping. Favor a visible fridge on small screens. */
   #hero .nordix-hero-video-player {
