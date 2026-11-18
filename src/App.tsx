@@ -27,7 +27,11 @@ function LegacyMarkup({ html }: { html: string }) {
 function Cursor() { return <LegacyMarkup html={cursor} /> }
 function Header() { return <LegacyMarkup html={header} /> }
 function MobileMenu() { return <LegacyMarkup html={mobileMenu} /> }
-function Hero() { return <LegacyMarkup html={hero} /> }
+function Hero() {
+  // Respect the Vite base path when hosted under /NORDIX/ on GitHub Pages.
+  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-fridge.mp4'
+  return <LegacyMarkup html={hero.replace('__NORDIX_FRIDGE_VIDEO__', videoUrl)} />
+}
 function Ticker() { return <LegacyMarkup html={ticker} /> }
 function Programs() { return <LegacyMarkup html={programs} /> }
 function Methodology() { return <LegacyMarkup html={methodology} /> }

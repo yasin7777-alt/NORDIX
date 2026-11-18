@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - refactor/react-migration
+      - feature/hero-fridge-video
   workflow_dispatch:
 
 permissions:
