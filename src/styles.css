@@ -298,83 +298,79 @@
     }
   
 
-/* Right-hand refrigerator film on the landing screen, aligned to the marked-up
-   area from the reference. No frame, controls, or interference with buttons. */
-.nordix-hero-video {
+/* Full-screen NORDIX refrigerator video — behind the entire hero, not beside the copy.
+   Keep all interactive content above the film; the gentle left veil protects text
+   contrast while the equipment stays visible on the right of the composition. */
+#hero {
+  isolation: isolate;
+  min-height: 100svh;
+}
+#hero .nordix-hero-video {
   position: absolute;
-  inset-block: 0;
-  right: -3vw;
-  width: min(33vw, 600px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   pointer-events: none;
-  background: transparent;
+  background: #fdfcfc;
 }
-.nordix-hero-video-player {
+#hero .nordix-hero-video-player {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
-  border: none;
-  background: transparent;
-  mix-blend-mode: multiply;
+  object-fit: cover;
+  object-position: center center;
+  border: 0;
+  pointer-events: none;
 }
-@media (min-width: 1180px) {
-  #hero .hero-layout {
-    padding-right: min(33vw, 600px);
-    min-height: min(68vh, 660px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  #hero .hero-title {
-    font-size: clamp(44px, 4.25vw, 82px);
-    letter-spacing: -.045em;
-  }
-  #hero .hero-title > span:last-child {
-    white-space: normal;
-  }
-  #hero .hero-intro {
-    max-width: 100%;
-  }
-  #hero .hero-intro > .reveal-up {
-    display: flex;
-    flex-wrap: wrap;
-    gap: clamp(14px, 2.1vw, 36px);
-  }
-  #hero .hero-intro p {
-    flex: 1 1 320px;
-  }
-  #hero .hero-intro p + div {
-    flex-wrap: wrap;
-  }
+/* A light gradient keeps black text readable over every frame of the film. */
+#hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(253,252,252,.80) 0%,
+    rgba(253,252,252,.56) 38%,
+    rgba(253,252,252,.14) 72%,
+    rgba(253,252,252,0) 100%
+  );
 }
-@media (max-width: 1179px) {
-  .nordix-hero-video {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    max-height: 560px;
-    margin: 28px auto 0;
-  }
-  #hero .hero-title > span:last-child {
-    white-space: normal;
+#hero .hero-layout {
+  position: relative;
+  z-index: 2;
+  padding-right: 0;
+  display: block;
+  min-height: auto;
+}
+#hero .hero-title {
+  font-size: clamp(48px, 5.8vw, 112px);
+  letter-spacing: -.045em;
+}
+#hero .hero-intro { max-width: 1440px; }
+#hero .hero-intro > .reveal-up {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: clamp(32px, 6vw, 116px);
+}
+#hero .hero-intro p { flex: 0 1 480px; }
+#hero .hero-intro p + div { flex-wrap: nowrap; }
+@media (max-width: 1023px) {
+  #hero .hero-title { font-size: 6.4vw; }
+  #hero .hero-intro > .reveal-up { display: block; }
+  #hero .hero-intro p + div { flex-wrap: wrap; }
+  #hero::before {
+    background: linear-gradient(180deg, rgba(253,252,252,.66), rgba(253,252,252,.37));
   }
 }
 @media (max-width: 600px) {
-  .nordix-hero-video {
-    margin-top: 22px;
-  }
+  #hero .hero-title { font-size: 6.3vw; }
+  #hero .nordix-hero-video-player { object-position: 62% center; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .nordix-hero-video-player {
-    /* Video stays visible, but users can still pause motion via OS/browser. */
-    animation: none;
-  }
+  #hero .nordix-hero-video-player { display: none; }
 }
