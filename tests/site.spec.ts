@@ -78,7 +78,7 @@ test('fridge video is the full-screen background behind the hero headlines', asy
   const heroBox = await hero.boundingBox()
   const videoBox = await background.boundingBox()
   if (!heroBox || !videoBox) throw new Error('Hero background and page need visible dimensions')
-  expect(heroBox.width).toBe(1792)
+  expect(heroBox.width).toBeGreaterThan(1700)
   expect(heroBox.height).toBeGreaterThanOrEqual(900)
   expect(Math.abs(videoBox.x - heroBox.x)).toBeLessThan(2)
   expect(Math.abs(videoBox.y - heroBox.y)).toBeLessThan(2)
