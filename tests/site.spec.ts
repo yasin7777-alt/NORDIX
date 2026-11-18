@@ -90,3 +90,13 @@ test('fridge film moves below the call to action on mobile', async ({ page }) =>
   expect(film.y).toBeGreaterThan(intro.y)
   expect(film.width).toBeLessThanOrEqual(390)
 })
+
+test('uploaded refrigerator video exists under the exact URL used by the hero', async ({ page }) => {
+  await page.goto('/')
+  const source = page.locator('#hero video source')
+  await expect(source).toHaveAttribute('src', '/NORDIX/videos/nordix-fridge.mp4')
+  const response = await page.request.head('/NORDIX/videos/nordix-fridge.mp4')
+  expect(response.ok()).toBeTruthy()
+  expect(response.headers()['content-type']).toContain('video/mp4')
+  expect(Number(response.headers()['content-length'])).toBeGreaterThan(20_000_000)
+})
