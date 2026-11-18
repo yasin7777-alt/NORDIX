@@ -303,7 +303,8 @@
    The empty left side of the film remains available for readable copy. */
 #hero {
   isolation: isolate;
-  min-height: 100svh;
+  /* Reserve exactly one ticker height inside the first viewport, like SYS/LAB. */
+  min-height: calc(100svh - 64px);
   background: #fdfcfc;
 }
 #hero .nordix-hero-video {
