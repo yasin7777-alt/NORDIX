@@ -136,3 +136,23 @@ test('ticker is visible at the very bottom of the opening viewport, like SYS/LAB
   await expect(page.locator('#hero .hero-title')).toBeVisible()
   await expect(page.locator('#hero .nordix-hero-video')).toBeVisible()
 })
+
+test('hero typography is larger but stays inside the first screen beside the refrigerator', async ({ page }) => {
+  await page.setViewportSize({ width: 1792, height: 900 })
+  await page.goto('/')
+  const fontSize = async (selector: string): Promise<number> => Number(
+    (await page.locator(selector).first().evaluate(el => getComputedStyle(el).fontSize)).replace('px','')
+  )
+  expect(await fontSize('#hero .hero-title')).toBeGreaterThanOrEqual(74)
+  expect(await fontSize('#hero .hero-status span.text-n800')).toBeGreaterThanOrEqual(15)
+  expect(await fontSize('#hero .hero-intro p')).toBeGreaterThanOrEqual(20)
+  expect(await fontSize('#hero .hero-intro a')).toBeGreaterThanOrEqual(13)
+  expect(await fontSize('#hero .hero-intro button')).toBeGreaterThanOrEqual(13)
+  const title = await page.locator('#hero .hero-title').boundingBox()
+  const cta = await page.locator('#hero .hero-intro').boundingBox()
+  const ticker = await page.locator('#hero-marquee').boundingBox()
+  if (!title || !cta || !ticker) throw new Error('Headline, CTA and ticker must exist')
+  expect(title.x + title.width).toBeLessThan(1792 * .60)
+  expect(cta.y + cta.height).toBeLessThan(ticker.y)
+  await expect(page.locator('#hero .nordix-hero-video')).toBeVisible()
+})
