@@ -298,20 +298,21 @@
     }
   
 
-/* Full-screen NORDIX refrigerator video — behind the entire hero, not beside the copy.
-   Keep all interactive content above the film; the gentle left veil protects text
-   contrast while the equipment stays visible on the right of the composition. */
+/* NORDIX hero film: show the WHOLE 16:9 source image, exactly as in the
+   original fridge video. It sits behind the heading, not in another column.
+   The empty left side of the film remains available for readable copy. */
 #hero {
   isolation: isolate;
   min-height: 100svh;
+  background: #fdfcfc;
 }
 #hero .nordix-hero-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
   overflow: hidden;
+  z-index: 0;
   pointer-events: none;
   background: #fdfcfc;
 }
@@ -319,24 +320,24 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Contain preserves the full video frame: no enlarged/cropped refrigerator. */
+  object-fit: contain;
   object-position: center center;
+  background: #fdfcfc;
   border: 0;
   pointer-events: none;
 }
-/* A light gradient keeps black text readable over every frame of the film. */
+/* Subtle veil on the text side only; the refrigerator stays fully visible. */
 #hero::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(253,252,252,.80) 0%,
-    rgba(253,252,252,.56) 38%,
-    rgba(253,252,252,.14) 72%,
-    rgba(253,252,252,0) 100%
+  background: linear-gradient(90deg,
+    rgba(253,252,252,.35) 0%,
+    rgba(253,252,252,.20) 33%,
+    rgba(253,252,252,0) 61%
   );
 }
 #hero .hero-layout {
@@ -346,30 +347,77 @@
   display: block;
   min-height: auto;
 }
-#hero .hero-title {
-  font-size: clamp(48px, 5.8vw, 112px);
-  letter-spacing: -.045em;
+@media (min-width: 1024px) {
+  /* The original full-width heading covered the refrigerator. Keep every
+     existing word, but group the copy on the empty LEFT side of the film. */
+  #hero .hero-status {
+    max-width: min(57vw, 920px);
+  }
+  #hero .hero-title {
+    width: max-content;
+    max-width: min(55vw, 940px);
+    font-size: clamp(38px, 3.5vw, 67px);
+    line-height: 1.07;
+    letter-spacing: -.045em;
+  }
+  #hero .hero-title > span:last-child {
+    white-space: normal;
+  }
+  #hero .hero-title > span:nth-child(2) {
+    gap: 16px;
+    flex-wrap: nowrap;
+  }
+  #hero .hero-title > span:nth-child(2) > span:first-child {
+    padding: 9px 13px;
+    border-radius: 15px;
+  }
+  #hero .hero-intro {
+    max-width: min(53vw, 760px);
+    margin-top: clamp(22px, 3vh, 38px);
+  }
+  #hero .hero-intro > .reveal-up {
+    display: block;
+  }
+  #hero .hero-intro p {
+    max-width: 560px;
+    font-size: clamp(15px, 1.05vw, 18px);
+    line-height: 1.55;
+  }
+  #hero .hero-intro p + div {
+    display: flex;
+    margin-top: 22px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  #hero .hero-intro a,
+  #hero .hero-intro button {
+    font-size: 11px;
+    padding: 14px 18px;
+  }
 }
-#hero .hero-intro { max-width: 1440px; }
-#hero .hero-intro > .reveal-up {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  gap: clamp(32px, 6vw, 116px);
-}
-#hero .hero-intro p { flex: 0 1 480px; }
-#hero .hero-intro p + div { flex-wrap: nowrap; }
 @media (max-width: 1023px) {
   #hero .hero-title { font-size: 6.4vw; }
+  #hero .hero-title > span:last-child { white-space: normal; }
   #hero .hero-intro > .reveal-up { display: block; }
   #hero .hero-intro p + div { flex-wrap: wrap; }
   #hero::before {
-    background: linear-gradient(180deg, rgba(253,252,252,.66), rgba(253,252,252,.37));
+    background: linear-gradient(180deg,
+      rgba(253,252,252,.55), rgba(253,252,252,.10));
   }
 }
 @media (max-width: 600px) {
   #hero .hero-title { font-size: 6.3vw; }
-  #hero .nordix-hero-video-player { object-position: 62% center; }
+  /* Portrait screens cannot display a 16:9 frame edge-to-edge without
+     letterboxing or cropping. Favor a visible fridge on small screens. */
+  #hero .nordix-hero-video-player {
+    object-fit: cover;
+    object-position: 73% center;
+  }
+  #hero::before {
+    background: linear-gradient(180deg,
+      rgba(253,252,252,.82) 0%, rgba(253,252,252,.30) 65%,
+      rgba(253,252,252,.06) 100%);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   #hero .nordix-hero-video-player { display: none; }
