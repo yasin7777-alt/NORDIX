@@ -1,6 +1,12 @@
 <!-- HERO SECTION -->
   <section id="hero" class="relative pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-8 overflow-hidden bg-n100">
     <!-- Decorative subtle grid & ambient glow -->
+    <!-- Full-bleed ambient video; the heading and buttons stay above it. -->
+    <div class="nordix-hero-video" aria-hidden="true">
+      <video class="nordix-hero-video-player" autoplay muted loop playsinline preload="auto" tabindex="-1">
+        <source src="__NORDIX_FRIDGE_VIDEO__" type="video/mp4" />
+      </video>
+    </div>
     <div class="hero-layout relative">
       
       <!-- Top Status Pill -->
@@ -55,19 +61,5 @@
 
       </div>
 
-      <!-- NORDIX refrigerator disassembly film: naturally blends with the white hero. -->
-      <div class="nordix-hero-video" aria-label="Видео: разборка холодильного оборудования">
-        <video
-          class="nordix-hero-video-player"
-          autoplay
-          muted
-          loop
-          playsinline
-          preload="metadata"
-          aria-label="Анимационный разбор холодильника и его внутренних компонентов"
-        >
-          <source src="__NORDIX_FRIDGE_VIDEO__" type="video/mp4" />
-        </video>
-      </div>
     </div>
   </section>
