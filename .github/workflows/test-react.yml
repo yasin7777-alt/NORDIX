@@ -7,6 +7,7 @@ on:
       - feature/hero-fridge-video
       - deploy/nordix-pages
       - main
+      - fix/hero-ticker-first-viewport
       - fix/hero-video-full-frame
       - feature/fullscreen-hero-video
   workflow_dispatch:
