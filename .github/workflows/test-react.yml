@@ -1,0 +1,39 @@
+name: Validate NORDIX React migration
+
+on:
+  push:
+    branches:
+      - refactor/react-migration
+      - feature/hero-fridge-video
+      - deploy/nordix-pages
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Typecheck and build
+        run: npm run build
+      - name: Prepare original HTML comparison
+        run: cp backup/NORDIX_original.html public/legacy.html
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Test all sections and interactions
+        run: npm run test:e2e
+      - name: Save visual regression artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nordix-test-results
+          path: test-results/
+          retention-days: 7

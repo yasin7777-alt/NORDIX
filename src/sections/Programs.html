@@ -1,0 +1,39 @@
+<!-- INTERACTIVE PROGRAMS / FACULTIES SECTION -->
+  <section id="directions" class="py-20 sm:py-32 px-4 sm:px-8 bg-n200">
+    <div class="max-w-[1440px] mx-auto">
+      
+      <!-- Header + Filter Tabs -->
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-14">
+        <div class="reveal-up">
+          <span class="inline-block text-xs font-display font-bold uppercase tracking-widest text-accent mb-3">
+            [ 01 // БАЗА ПО СПЕЦИАЛЬНОСТИ ]
+          </span>
+          <h2 class="section-mega font-display font-black uppercase text-n900">
+            МОДУЛИ<br/><span class="text-n700">NORDIX</span>
+          </h2>
+        </div>
+
+        <!-- Animated Filter Switcher -->
+        <div class="reveal-up flex flex-wrap gap-2 bg-n400 p-2 rounded-3xl border border-n500" id="course-filters">
+          <button data-filter="all" class="filter-btn active px-6 py-3.5 rounded-2xl font-display font-bold text-xs uppercase tracking-wider bg-n900 text-n0 transition-all">
+            Все (6)
+          </button>
+          <button data-filter="ai" class="filter-btn px-6 py-3.5 rounded-2xl font-display font-bold text-xs uppercase tracking-wider text-n800 hover:bg-n300 transition-all">
+            Холод
+          </button>
+          <button data-filter="dev" class="filter-btn px-6 py-3.5 rounded-2xl font-display font-bold text-xs uppercase tracking-wider text-n800 hover:bg-n300 transition-all">
+            Электрика
+          </button>
+          <button data-filter="design" class="filter-btn px-6 py-3.5 rounded-2xl font-display font-bold text-xs uppercase tracking-wider text-n800 hover:bg-n300 transition-all">
+            Монтаж
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Course Grid with Smooth Filter Transitions -->
+      <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-500">
+        <!-- Populated by JS for rich interactivity, filtering & modal details -->
+      </div>
+
+    </div>
+  </section>

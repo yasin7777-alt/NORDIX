@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NORDIX — Электромонтаж и промышленный холод</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: '#3d75d8',
+            semantic: '#2b7fff',
+            n900: '#000000',
+            n800: '#44403b',
+            n700: '#777169',
+            n600: '#a59f97',
+            n500: '#d7d2cc',
+            n400: '#ebe8e4',
+            n300: '#f0efef',
+            n200: '#f5f3f1',
+            n100: '#fdfcfc',
+            n0: '#ffffff',
+          },
+          fontFamily: {
+            display: ['Unbounded', 'sans-serif'],
+            sans: ['Manrope', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+    <!-- Original styling and font configuration retained for pixel-safe migration. -->
+</head>
+<body class="selection:bg-accent selection:text-n0 antialiased">
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
