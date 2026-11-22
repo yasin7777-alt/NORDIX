@@ -355,18 +355,20 @@
     max-width: min(57vw, 950px);
   }
   #hero .hero-status span.text-n800 {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.5;
   }
   #hero .hero-title {
     width: max-content;
     max-width: min(55vw, 1020px);
-    font-size: clamp(43px, 4.2vw, 80px);
+    font-size: clamp(46px, 4.5vw, 85px);
     line-height: 1.07;
     letter-spacing: -.045em;
   }
-  #hero .hero-title > span:last-child {
-    white-space: normal;
+  #hero .hero-title > span:nth-child(3),
+  #hero .hero-title > span:nth-child(4) {
+    display: block;
+    white-space: nowrap;
   }
   #hero .hero-title > span:nth-child(2) {
     gap: 16px;
@@ -375,6 +377,12 @@
   #hero .hero-title > span:nth-child(2) > span:first-child {
     padding: 9px 13px;
     border-radius: 15px;
+  }
+  /* The heading gained a fourth line: reduce dead vertical padding to keep
+     all hero content and the ticker inside one opening screen. */
+  #hero {
+    padding-top: clamp(96px, 12vh, 125px);
+    padding-bottom: clamp(16px, 2.4vh, 32px);
   }
   #hero .hero-intro {
     max-width: min(53vw, 760px);
@@ -385,7 +393,7 @@
   }
   #hero .hero-intro p {
     max-width: 620px;
-    font-size: clamp(18px, 1.15vw, 22px);
+    font-size: clamp(19px, 1.23vw, 23px);
     line-height: 1.55;
   }
   #hero .hero-intro p + div {
@@ -396,12 +404,12 @@
   }
   #hero .hero-intro a,
   #hero .hero-intro button {
-    font-size: 13px;
+    font-size: 14px;
     padding: 16px 22px;
   }
 }
 @media (max-width: 1023px) {
-  #hero .hero-title { font-size: 7.1vw; }
+  #hero .hero-title { font-size: 7.35vw; }
   #hero .hero-title > span:last-child { white-space: normal; }
   #hero .hero-intro > .reveal-up { display: block; }
   #hero .hero-intro p + div { flex-wrap: wrap; }
@@ -411,7 +419,7 @@
   }
 }
 @media (max-width: 600px) {
-  #hero .hero-title { font-size: 6.9vw; }
+  #hero .hero-title { font-size: 7.1vw; }
   /* Portrait screens cannot display a 16:9 frame edge-to-edge without
      letterboxing or cropping. Favor a visible fridge on small screens. */
   #hero .nordix-hero-video-player {
