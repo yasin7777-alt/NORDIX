@@ -157,52 +157,55 @@ test('hero typography is larger but stays inside the first screen beside the ref
   await expect(page.locator('#hero .nordix-hero-video')).toBeVisible()
 })
 
-test('SYS/LAB-style three-line heading, blue accent and desktop spacing', async ({ page }) => {
+test('restored NORDIX slogan uses original inline logo at the unchanged large font size', async ({ page }) => {
   await page.setViewportSize({ width: 1792, height: 900 })
   await page.goto('/')
   const title = page.locator('#hero .hero-title')
   const lines = title.locator(':scope > span')
-  await expect(lines).toHaveCount(3)
-  await expect(lines.nth(0)).toHaveText('ПРОКАЧАЙ')
-  await expect(lines.nth(1)).toHaveText('СКИЛЛЫ В МИРЕ')
-  await expect(lines.nth(2)).toHaveText('ХОЛОДА')
-  await expect(title).toHaveAttribute('aria-label', 'Прокачай скиллы в мире холода')
-  const accent = await lines.nth(2).evaluate(el => getComputedStyle(el).color)
-  expect(accent).toBe('rgb(61, 117, 216)')
-  const rects = await Promise.all([0,1,2].map(async i => await lines.nth(i).boundingBox()))
-  if (rects.some(box => !box)) throw new Error('Hero lines must be visible')
-  const [first, middle, last] = rects as Array<NonNullable<typeof rects[0]>>
-  expect(middle.y).toBeGreaterThanOrEqual(first.y + first.height - 2)
-  expect(last.y).toBeGreaterThanOrEqual(middle.y + middle.height - 2)
-  expect(middle.x + middle.width).toBeLessThan(1792 * .62)
-  const textMetrics = await lines.nth(1).evaluate(el => ({
-    scrollWidth: el.scrollWidth,
-    clientWidth: el.clientWidth,
-  }))
-  expect(textMetrics.scrollWidth).toBeLessThanOrEqual(textMetrics.clientWidth + 2)
-  const textFontSize = Number(await title.evaluate(el => getComputedStyle(el).fontSize.replace('px','')))
-  expect(textFontSize).toBeGreaterThanOrEqual(95)
+  await expect(lines).toHaveCount(4)
+  await expect(title).toHaveAttribute('aria-label', 'Держим холод под контролем')
+  await expect(lines.nth(0)).toHaveText('ДЕРЖИМ')
+  await expect(lines.nth(1)).toContainText('ХОЛОД')
+  await expect(lines.nth(2)).toHaveText('ПОД')
+  await expect(lines.nth(3)).toHaveText('КОНТРОЛЕМ')
+  const image = lines.nth(1).locator('img[alt="Символ бесконечности NORDIX"]')
+  await expect(image).toHaveCount(1)
+  await expect(image).toBeVisible()
+  await expect(lines.nth(1)).toHaveCSS('display', 'flex')
+  const fontSize = Number(await title.evaluate(el => getComputedStyle(el).fontSize.replace('px','')))
+  expect(fontSize).toBeGreaterThanOrEqual(95) // same as the large three-line design
+  const rects = await Promise.all([0,1,2,3].map(i => lines.nth(i).boundingBox()))
+  if (rects.some(box => !box)) throw new Error('All restored headline rows should be visible')
+  const [first, second, third, fourth] = rects as Array<NonNullable<typeof rects[0]>>
+  expect(second.y).toBeGreaterThanOrEqual(first.y + first.height - 2)
+  expect(third.y).toBeGreaterThanOrEqual(second.y + second.height - 2)
+  expect(fourth.y).toBeGreaterThanOrEqual(third.y + third.height - 2)
+  expect(fourth.x + fourth.width).toBeLessThan(1792 * .62)
   const intro = await page.locator('#hero .hero-intro').boundingBox()
   const ticker = await page.locator('#hero-marquee').boundingBox()
-  if (!intro || !ticker) throw new Error('Intro and ticker must have visible boxes')
+  if (!intro || !ticker) throw new Error('Intro and ticker must remain visible')
   expect(intro.y + intro.height).toBeLessThan(ticker.y)
   await expect(page.locator('#hero .nordix-hero-video')).toBeVisible()
 })
 
-test('three-line headline fits smaller desktop and mobile layouts', async ({ page }) => {
+test('restored oversized headline and logo fit laptop and mobile screens', async ({ page }) => {
   for (const size of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(size)
     await page.goto('/')
-    const lines = page.locator('#hero .hero-title > span')
-    await expect(lines).toHaveCount(3)
-    const mobileHeadline = await page.locator('#hero .hero-title').boundingBox()
+    const title = page.locator('#hero .hero-title')
+    const lines = title.locator(':scope > span')
+    await expect(lines).toHaveCount(4)
+    await expect(lines.nth(1).locator('img')).toBeVisible()
+    const headline = await title.boundingBox()
     const ticker = await page.locator('#hero-marquee').boundingBox()
     const intro = await page.locator('#hero .hero-intro').boundingBox()
-    if (!mobileHeadline || !ticker || !intro) throw new Error('Responsive hero content should be visible')
-    expect(mobileHeadline.x).toBeGreaterThanOrEqual(0)
-    expect(mobileHeadline.x + mobileHeadline.width).toBeLessThanOrEqual(size.width)
+    if (!headline || !ticker || !intro) throw new Error('Responsive hero should remain visible')
+    expect(headline.x).toBeGreaterThanOrEqual(0)
+    expect(headline.x + headline.width).toBeLessThanOrEqual(size.width)
     expect(intro.y + intro.height).toBeLessThan(ticker.y)
-    const overflow = await lines.nth(1).evaluate(el => el.scrollWidth - el.clientWidth)
-    expect(overflow).toBeLessThanOrEqual(2)
+    for (const index of [1,3]) {
+      const overflow = await lines.nth(index).evaluate(el => el.scrollWidth - el.clientWidth)
+      expect(overflow).toBeLessThanOrEqual(2)
+    }
   }
 })
