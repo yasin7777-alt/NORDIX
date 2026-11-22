@@ -160,6 +160,7 @@ test('hero typography is larger but stays inside the first screen beside the ref
 test('restored NORDIX slogan uses original inline logo at the unchanged large font size', async ({ page }) => {
   await page.setViewportSize({ width: 1792, height: 900 })
   await page.goto('/')
+  await expect(page.locator('#hero .hero-intro p')).toHaveText('Разбирай железо, изучай схемы и прокачивай навыки. Всё о технологиях холода — без лишней воды.')
   const title = page.locator('#hero .hero-title')
   const lines = title.locator(':scope > span')
   await expect(lines).toHaveCount(4)
@@ -173,7 +174,8 @@ test('restored NORDIX slogan uses original inline logo at the unchanged large fo
   await expect(image).toBeVisible()
   await expect(lines.nth(1)).toHaveCSS('display', 'flex')
   const fontSize = Number(await title.evaluate(el => getComputedStyle(el).fontSize.replace('px','')))
-  expect(fontSize).toBeGreaterThanOrEqual(95) // same as the large three-line design
+  expect(fontSize).toBeGreaterThanOrEqual(90) // slightly smaller than previous 100px desktop type
+  expect(fontSize).toBeLessThanOrEqual(96)
   const rects = await Promise.all([0,1,2,3].map(i => lines.nth(i).boundingBox()))
   if (rects.some(box => !box)) throw new Error('All restored headline rows should be visible')
   const [first, second, third, fourth] = rects as Array<NonNullable<typeof rects[0]>>
