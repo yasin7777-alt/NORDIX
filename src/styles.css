@@ -366,7 +366,7 @@
   #hero .hero-title {
     width: max-content;
     max-width: min(56vw, 1040px);
-    font-size: clamp(64px, 5.6vw, 112px);
+    font-size: clamp(58px, 5.2vw, 104px);
     line-height: 1.01;
     letter-spacing: -.055em;
   }
@@ -417,13 +417,13 @@
 }
 @media (min-width: 1024px) and (max-width: 1439px) {
   #hero .hero-title {
-    font-size: clamp(46px, 5vw, 72px);
+    font-size: clamp(44px, 4.7vw, 68px);
     max-width: 57vw;
   }
   #hero .hero-title > span:nth-child(2) { font-size: 1em; }
 }
 @media (max-width: 1023px) {
-  #hero .hero-title { font-size: 7.5vw; line-height: 1.1; }
+  #hero .hero-title { font-size: 7vw; line-height: 1.1; }
   #hero .hero-title > span { display: block; white-space: nowrap; }
   #hero .hero-title > span:nth-child(2) { display: flex; align-items: center; font-size: 1em; letter-spacing: -.05em; }
   #hero .hero-title > span:last-child { white-space: normal; }
@@ -435,7 +435,7 @@
   }
 }
 @media (max-width: 600px) {
-  #hero .hero-title { font-size: 8.2vw; }
+  #hero .hero-title { font-size: 7.7vw; }
   #hero .hero-title > span:nth-child(2) { font-size: 1em; gap: .1em; }
   /* Portrait screens cannot display a 16:9 frame edge-to-edge without
      letterboxing or cropping. Favor a visible fridge on small screens. */
