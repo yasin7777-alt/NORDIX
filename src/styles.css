@@ -374,11 +374,22 @@
     display: block;
     white-space: nowrap;
   }
+  /* Original NORDIX logo + ХОЛОД, restored at the SAME large font size. */
   #hero .hero-title > span:nth-child(2) {
-    /* The Cyrillic text is significantly longer than "POWER OVER". */
-    font-size: .78em;
-    letter-spacing: -.06em;
-    margin: .05em 0 .08em;
+    display: flex;
+    align-items: center;
+    font-size: 1em;
+    letter-spacing: -.055em;
+    gap: .16em;
+    margin: .015em 0 .045em;
+  }
+  #hero .hero-title > span:nth-child(2) > span:first-child {
+    padding: .11em .14em;
+    border-radius: .18em;
+  }
+  #hero .hero-title img {
+    height: .68em;
+    width: auto;
   }
   #hero .hero-intro {
     max-width: min(53vw, 760px);
@@ -409,12 +420,12 @@
     font-size: clamp(46px, 5vw, 72px);
     max-width: 57vw;
   }
-  #hero .hero-title > span:nth-child(2) { font-size: .75em; }
+  #hero .hero-title > span:nth-child(2) { font-size: 1em; }
 }
 @media (max-width: 1023px) {
   #hero .hero-title { font-size: 7.5vw; line-height: 1.1; }
   #hero .hero-title > span { display: block; white-space: nowrap; }
-  #hero .hero-title > span:nth-child(2) { font-size: .86em; letter-spacing: -.05em; }
+  #hero .hero-title > span:nth-child(2) { display: flex; align-items: center; font-size: 1em; letter-spacing: -.05em; }
   #hero .hero-title > span:last-child { white-space: normal; }
   #hero .hero-intro > .reveal-up { display: block; }
   #hero .hero-intro p + div { flex-wrap: wrap; }
@@ -425,7 +436,7 @@
 }
 @media (max-width: 600px) {
   #hero .hero-title { font-size: 8.2vw; }
-  #hero .hero-title > span:nth-child(2) { font-size: .81em; }
+  #hero .hero-title > span:nth-child(2) { font-size: 1em; gap: .1em; }
   /* Portrait screens cannot display a 16:9 frame edge-to-edge without
      letterboxing or cropping. Favor a visible fridge on small screens. */
   #hero .nordix-hero-video-player {
