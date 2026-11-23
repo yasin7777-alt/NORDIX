@@ -335,7 +335,7 @@ test('final course invitation and course link fit a narrow mobile screen', async
 })
 
 
-test('NORDIX black curtain reveals pinned white final block proportionally to the wheel', async ({ page }) => {
+test('NORDIX final curtain follows the wheel and releases scrolling above the black block', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
   const scene = page.locator('.nordix-final-scene')
@@ -350,29 +350,61 @@ test('NORDIX black curtain reveals pinned white final block proportionally to th
     document.documentElement.style.scrollBehavior = 'auto'
     window.scrollTo(0, y)
   }, startY)
-  await page.waitForTimeout(100)
+  await page.waitForTimeout(150)
+
   const initialWhite = await closing.evaluate(el => el.getBoundingClientRect().top)
   expect(Math.abs(initialWhite)).toBeLessThanOrEqual(3)
-
   await page.mouse.move(720, 450)
-  await page.mouse.wheel(0, 300)
-  await page.waitForTimeout(650)
-  const firstMove = await footer.evaluate(el => el.getBoundingClientRect().top)
-  const pinned = await closing.evaluate(el => el.getBoundingClientRect().top)
-  expect(firstMove).toBeLessThan(-160)
-  expect(firstMove).toBeGreaterThan(-700)
-  expect(Math.abs(pinned)).toBeLessThanOrEqual(3)
 
-  await page.mouse.wheel(0, 240)
-  await page.waitForTimeout(650)
-  const secondMove = await footer.evaluate(el => el.getBoundingClientRect().top)
-  expect(secondMove).toBeLessThan(firstMove - 150)
-
-  await page.mouse.wheel(0, -300)
-  await page.waitForTimeout(700)
-  const reverseMove = await footer.evaluate(el => el.getBoundingClientRect().top)
-  expect(reverseMove).toBeGreaterThan(secondMove + 160)
+  // Small wheel deltas should reveal only part of the pinned white artwork.
+  await page.mouse.wheel(0, 320)
+  await page.waitForTimeout(450)
+  const progressY = await page.evaluate(() => window.scrollY)
+  expect(progressY).toBeGreaterThan(startY + 175)
+  expect(progressY).toBeLessThan(startY + 700)
   expect(Math.abs(await closing.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(3)
+
+  await page.mouse.wheel(0, 320)
+  await page.waitForTimeout(450)
+  const furtherY = await page.evaluate(() => window.scrollY)
+  expect(furtherY).toBeGreaterThan(progressY + 125)
+
+  // Reverse wheel should close the curtain without snapping to the previous page.
+  await page.mouse.wheel(0, -300)
+  await page.waitForTimeout(450)
+  const reverseY = await page.evaluate(() => window.scrollY)
+  expect(reverseY).toBeLessThan(furtherY - 125)
+  expect(reverseY).toBeGreaterThan(startY + 40)
+
+  // Regression: the old wheel handler trapped scroll at startY.
+  // Keep wheeling up: it must move past the black invitation and into FAQ.
+  await page.mouse.wheel(0, -800)
+  await page.waitForTimeout(450)
+  const escapedY = await page.evaluate(() => window.scrollY)
+  expect(escapedY).toBeLessThan(startY - 120)
+  expect(await footer.evaluate(el => el.getBoundingClientRect().top)).toBeGreaterThan(120)
+
+  // Scroll down again, so we know the crossing works in both directions.
+  await page.mouse.wheel(0, 520)
+  await page.waitForTimeout(450)
+  const reenterY = await page.evaluate(() => window.scrollY)
+  expect(reenterY).toBeGreaterThan(escapedY + 150)
+})
+
+test('scroll to NORDIX final can be reversed with keyboard and does not install a wheel lock', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  const sceneTop = await page.locator('.nordix-final-scene').evaluate(el => window.scrollY + el.getBoundingClientRect().top)
+  await page.evaluate(y => {
+    document.documentElement.style.scrollBehavior = 'auto'
+    window.scrollTo(0, y + 250)
+  }, sceneTop)
+  await page.keyboard.press('PageUp')
+  await page.waitForTimeout(300)
+  const afterKeyboardY = await page.evaluate(() => window.scrollY)
+  expect(afterKeyboardY).toBeLessThan(sceneTop)
+  const hasLock = await page.evaluate(() => document.documentElement.classList.contains('nordix-final-scroll-active'))
+  expect(hasLock).toBe(false)
 })
 
 test('NORDIX mobile final block remains in normal document flow', async ({ page }) => {

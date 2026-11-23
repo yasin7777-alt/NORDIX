@@ -762,7 +762,8 @@
  * NORDIX closing: the black invitation is the moving curtain.
  * White artwork stays in exactly the same place underneath it.
  * As you scroll down, the curtain rises; scrolling up lowers it again.
- * The scroll position, not a timed state change, controls the reveal.
+ * Native browser scrolling controls the reveal: never hijack wheel input.
+ * The scrollbar, trackpad, wheel, keyboard and touch can leave this section.
  */
 .nordix-final-scene {
   position: relative;
@@ -780,10 +781,6 @@
   margin-top: -100svh;
   z-index: 1;
 }
-html.nordix-final-scroll-active {
-  scroll-behavior: auto !important;
-  scroll-snap-type: none !important;
-}
 @media (max-width: 700px) {
   .nordix-final-scene { height: auto; }
   .nordix-final-scene #closing.closing-screen {
@@ -791,7 +788,4 @@ html.nordix-final-scroll-active {
     top: auto;
     margin-top: 0;
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  html.nordix-final-scroll-active { scroll-behavior: auto !important; }
 }
