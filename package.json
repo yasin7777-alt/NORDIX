@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "dev": "node scripts/split-closing-art.mjs && vite",
+    "build": "node scripts/split-closing-art.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test:e2e": "playwright test"
   },
@@ -19,6 +19,7 @@
     "@types/react-dom": "^19.2.3",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
-    "@playwright/test": "^1.56.1"
+    "@playwright/test": "^1.56.1",
+    "pngjs": "^7.0.0"
   }
 }

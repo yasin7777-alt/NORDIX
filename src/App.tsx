@@ -42,18 +42,47 @@ function Closing() {
   useEffect(() => {
     const section = document.getElementById('closing')
     if (!section) return
-    // Discourage casual copying without interrupting the interactive course link.
+    const scene = section.closest<HTMLElement>('.nordix-final-scene')
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let frame = 0
+
+    // Subtle letter-only parallax follows native scroll progress in both directions.
+    // Do not intercept the wheel: that caused the earlier upward scrolling bug.
+    const update = () => {
+      if (!scene) return
+      const progress = Math.max(0, Math.min(1, -scene.getBoundingClientRect().top / window.innerHeight))
+      const eased = progress * progress * (3 - 2 * progress)
+      const shift = reducedMotion.matches || window.innerWidth <= 700 ? 0 : (1 - eased) * 34
+      section.style.setProperty('--closing-word-shift', shift.toFixed(2) + 'px')
+    }
+    const onScroll = () => {
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        update()
+      })
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    reducedMotion.addEventListener('change', onScroll)
     const prevent = (event: Event) => event.preventDefault()
-    for (const eventName of ['contextmenu', 'dragstart', 'copy']) {
-      section.addEventListener(eventName, prevent)
+    for (const name of ['contextmenu', 'dragstart', 'copy']) {
+      section.addEventListener(name, prevent)
     }
     return () => {
-      for (const eventName of ['contextmenu', 'dragstart', 'copy']) {
-        section.removeEventListener(eventName, prevent)
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      reducedMotion.removeEventListener('change', onScroll)
+      for (const name of ['contextmenu', 'dragstart', 'copy']) {
+        section.removeEventListener(name, prevent)
       }
     }
   }, [])
-  return <LegacyMarkup html={closing.replace('__NORDIX_CLOSING_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-art.png')} />
+  return <LegacyMarkup html={closing
+    .replace('__NORDIX_CLOSING_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-bg.png')
+    .replace('__NORDIX_WORD_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-word.png')} />
 }
 function Modals() { return <LegacyMarkup html={modals} /> }
 

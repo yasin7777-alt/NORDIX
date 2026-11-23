@@ -10,7 +10,8 @@ test('original page sections, six modules and primary navigation still exist', a
   await expect(page.locator('#faq')).toHaveCount(1)
   await expect(page.locator('#closing')).toHaveCount(1)
   await expect(page.locator('#courses-grid .course-card')).toHaveCount(6)
-  await expect(page.locator('#closing .closing-background')).toHaveAttribute('src', /nordix-closing-art\.png$/)
+  await expect(page.locator('#closing .closing-background')).toHaveAttribute('src', /nordix-closing-bg\.png$/)
+  await expect(page.locator('#closing .closing-word-art')).toHaveAttribute('src', /nordix-closing-word\.png$/)
   await expect(page.locator('#closing .closing-background')).toHaveAttribute('draggable', 'false')
   await expect(page.locator('#closing .closing-cover')).toHaveCount(0)
   await expect(page.locator('#closing .closing-go')).toBeVisible()
@@ -409,4 +410,26 @@ test('NORDIX mobile final block remains in normal document flow', async ({ page 
   await page.goto('/')
   await expect(page.locator('.nordix-final-scene')).toHaveCSS('height', /auto|[0-9]+px/)
   await expect(page.locator('#closing')).toHaveCSS('position', 'relative')
+})
+
+test('scrolling reveals a subtly moving NORDIX logo without reintroducing wheel lock', async ({ page }) => {
+  await page.setViewportSize({width: 1440, height: 900})
+  await page.goto('/')
+  await expect(page.locator('#closing .closing-word-art')).toBeVisible()
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('scroll-behavior','auto','important')
+    const scene = document.querySelector('.nordix-final-scene')!
+    window.scrollTo({top: window.scrollY + scene.getBoundingClientRect().top, behavior:'instant'})
+  })
+  const shift = () => page.locator('#closing').evaluate(el =>
+    parseFloat(getComputedStyle(el).getPropertyValue('--closing-word-shift')))
+  await expect.poll(shift).toBeGreaterThan(30)
+  await page.mouse.move(720, 450)
+  await page.mouse.wheel(0, 400)
+  await expect.poll(shift).toBeLessThan(29)
+  await expect.poll(shift).toBeGreaterThan(5)
+  await page.mouse.wheel(0, 650)
+  await expect.poll(shift).toBeLessThan(1)
+  await page.mouse.wheel(0, -400)
+  await expect.poll(shift).toBeGreaterThan(5)
 })
