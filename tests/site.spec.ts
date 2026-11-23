@@ -427,24 +427,32 @@ test('NORDIX mobile final block remains in normal document flow', async ({ page 
   await expect(page.locator('#closing')).toHaveCSS('position', 'relative')
 })
 
-test('scrolling reveals a subtly moving NORDIX logo without reintroducing wheel lock', async ({ page }) => {
-  await page.setViewportSize({width: 1440, height: 900})
+test('NORDIX wordmark parallax reverses with native wheel scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
-  await expect(page.locator('#closing .closing-word-art')).toBeVisible()
-  await page.evaluate(() => {
-    document.documentElement.style.setProperty('scroll-behavior','auto','important')
-    const scene = document.querySelector('.nordix-final-scene')!
-    window.scrollTo({top: window.scrollY + scene.getBoundingClientRect().top, behavior:'instant'})
-  })
+  const word = page.locator('#closing .closing-word-art')
+  await expect(word).toBeVisible()
   const shift = () => page.locator('#closing').evaluate(el =>
     parseFloat(getComputedStyle(el).getPropertyValue('--closing-word-shift')))
-  await expect.poll(shift).toBeGreaterThan(30)
+
+  // Begin at the actual page bottom, where the logo has completed its travel.
+  // This is independent of async font/video layout and scroll-padding.
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important')
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+  })
+  await expect.poll(shift).toBeLessThan(1)
+
   await page.mouse.move(720, 450)
+  await page.mouse.wheel(0, -340)
+  await expect.poll(shift).toBeGreaterThan(4)
+  await expect.poll(shift).toBeLessThan(30)
+
+  await page.mouse.wheel(0, -520)
+  await expect.poll(shift).toBeGreaterThan(29)
+
   await page.mouse.wheel(0, 400)
   await expect.poll(shift).toBeLessThan(29)
-  await expect.poll(shift).toBeGreaterThan(5)
-  await page.mouse.wheel(0, 650)
-  await expect.poll(shift).toBeLessThan(1)
-  await page.mouse.wheel(0, -400)
-  await expect.poll(shift).toBeGreaterThan(5)
+  await expect.poll(shift).toBeGreaterThan(4)
+  expect(await page.evaluate(() => document.documentElement.classList.contains('nordix-final-scroll-active'))).toBe(false)
 })
