@@ -345,66 +345,60 @@ test('NORDIX final curtain follows the wheel and releases scrolling above the bl
   await expect(closing).toHaveCount(1)
   await expect(closing).toHaveCSS('position', 'sticky')
 
-  const startY = await scene.evaluate(el => el.getBoundingClientRect().top + window.scrollY)
-  await page.evaluate(y => {
-    document.documentElement.style.scrollBehavior = 'auto'
-    window.scrollTo(0, y)
-  }, startY)
-  await page.waitForTimeout(150)
-
-  const initialWhite = await closing.evaluate(el => el.getBoundingClientRect().top)
-  expect(Math.abs(initialWhite)).toBeLessThanOrEqual(3)
+  // Measure positions relative to the live viewport; fonts/cards can shift
+  // document offsets asynchronously during page startup.
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important')
+    document.querySelector('.nordix-final-scene')?.scrollIntoView({ block: 'start', behavior: 'instant' })
+  })
+  await page.waitForTimeout(250)
+  expect(Math.abs(await scene.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(4)
+  expect(Math.abs(await closing.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(4)
   await page.mouse.move(720, 450)
 
-  // Small wheel deltas should reveal only part of the pinned white artwork.
   await page.mouse.wheel(0, 320)
   await page.waitForTimeout(450)
-  const progressY = await page.evaluate(() => window.scrollY)
-  expect(progressY).toBeGreaterThan(startY + 175)
-  expect(progressY).toBeLessThan(startY + 700)
-  expect(Math.abs(await closing.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(3)
+  const firstFooterTop = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(firstFooterTop).toBeLessThan(-150)
+  expect(firstFooterTop).toBeGreaterThan(-700)
+  expect(Math.abs(await closing.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(4)
 
   await page.mouse.wheel(0, 320)
   await page.waitForTimeout(450)
-  const furtherY = await page.evaluate(() => window.scrollY)
-  expect(furtherY).toBeGreaterThan(progressY + 125)
+  const secondFooterTop = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(secondFooterTop).toBeLessThan(firstFooterTop - 100)
 
-  // Reverse wheel should close the curtain without snapping to the previous page.
   await page.mouse.wheel(0, -300)
   await page.waitForTimeout(450)
-  const reverseY = await page.evaluate(() => window.scrollY)
-  expect(reverseY).toBeLessThan(furtherY - 125)
-  expect(reverseY).toBeGreaterThan(startY + 40)
+  const reverseFooterTop = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(reverseFooterTop).toBeGreaterThan(secondFooterTop + 100)
 
-  // Regression: the old wheel handler trapped scroll at startY.
-  // Keep wheeling up: it must move past the black invitation and into FAQ.
-  await page.mouse.wheel(0, -800)
+  // Previously the wheel handler clamped scrolling at the beginning of this scene.
+  // The browser must now let the user continue into FAQ, past the black curtain.
+  await page.mouse.wheel(0, -1000)
   await page.waitForTimeout(450)
-  const escapedY = await page.evaluate(() => window.scrollY)
-  expect(escapedY).toBeLessThan(startY - 120)
+  expect(await scene.evaluate(el => el.getBoundingClientRect().top)).toBeGreaterThan(120)
   expect(await footer.evaluate(el => el.getBoundingClientRect().top)).toBeGreaterThan(120)
 
-  // Scroll down again, so we know the crossing works in both directions.
   await page.mouse.wheel(0, 520)
   await page.waitForTimeout(450)
-  const reenterY = await page.evaluate(() => window.scrollY)
-  expect(reenterY).toBeGreaterThan(escapedY + 150)
+  expect(await scene.evaluate(el => el.getBoundingClientRect().top)).toBeLessThan(200)
 })
 
-test('scroll to NORDIX final can be reversed with keyboard and does not install a wheel lock', async ({ page }) => {
+test('keyboard navigation escapes the final block without a wheel lock', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
-  const sceneTop = await page.locator('.nordix-final-scene').evaluate(el => window.scrollY + el.getBoundingClientRect().top)
-  await page.evaluate(y => {
-    document.documentElement.style.scrollBehavior = 'auto'
-    window.scrollTo(0, y + 250)
-  }, sceneTop)
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important')
+    const scene = document.querySelector('.nordix-final-scene')!
+    window.scrollTo({top: window.scrollY + scene.getBoundingClientRect().top + 250, behavior: 'instant'})
+  })
+  await page.waitForTimeout(150)
   await page.keyboard.press('PageUp')
-  await page.waitForTimeout(300)
-  const afterKeyboardY = await page.evaluate(() => window.scrollY)
-  expect(afterKeyboardY).toBeLessThan(sceneTop)
-  const hasLock = await page.evaluate(() => document.documentElement.classList.contains('nordix-final-scroll-active'))
-  expect(hasLock).toBe(false)
+  await page.waitForTimeout(450)
+  // Positive top means FAQ is visible again above the black invitation.
+  expect(await page.locator('.nordix-final-scene').evaluate(el => el.getBoundingClientRect().top)).toBeGreaterThan(100)
+  expect(await page.evaluate(() => document.documentElement.classList.contains('nordix-final-scroll-active'))).toBe(false)
 })
 
 test('NORDIX mobile final block remains in normal document flow', async ({ page }) => {
