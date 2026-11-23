@@ -349,7 +349,10 @@ test('NORDIX final curtain follows the wheel and releases scrolling above the bl
   // document offsets asynchronously during page startup.
   await page.evaluate(() => {
     document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important')
-    document.querySelector('.nordix-final-scene')?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    const scene = document.querySelector('.nordix-final-scene')
+    if (!scene) throw new Error('Missing final scene')
+    // Explicit pixel position avoids the site's 100px scroll-padding used by navbar anchors.
+    window.scrollTo({ top: window.scrollY + scene.getBoundingClientRect().top, behavior: 'instant' })
   })
   await page.waitForTimeout(250)
   expect(Math.abs(await scene.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(4)
