@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { installClosingScrollTransition } from './closingScrollTransition'
 
 import cursor from './sections/Cursor.html?raw'
 import header from './sections/Header.html?raw'
@@ -42,12 +43,14 @@ function Closing() {
   useEffect(() => {
     const section = document.getElementById('closing')
     if (!section) return
+    const removeScrollTransition = installClosingScrollTransition()
     // Discourage casual copying without interrupting the interactive course link.
     const prevent = (event: Event) => event.preventDefault()
     for (const eventName of ['contextmenu', 'dragstart', 'copy']) {
       section.addEventListener(eventName, prevent)
     }
     return () => {
+      removeScrollTransition()
       for (const eventName of ['contextmenu', 'dragstart', 'copy']) {
         section.removeEventListener(eventName, prevent)
       }

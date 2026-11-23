@@ -333,3 +333,25 @@ test('final course invitation and course link fit a narrow mobile screen', async
   const overflow = await heading.locator(':scope > span').nth(1).evaluate(el => el.scrollWidth - el.clientWidth)
   expect(overflow).toBeLessThanOrEqual(2)
 })
+
+
+test('last two NORDIX sections glide vertically in both directions like the reference', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  const footer = page.locator('footer')
+  const closing = page.locator('#closing')
+  const footerY = await footer.evaluate(el => window.scrollY + el.getBoundingClientRect().top)
+  await page.evaluate(y => {
+    document.documentElement.style.scrollBehavior = 'auto'
+    window.scrollTo(0, y)
+  }, footerY)
+  await page.mouse.move(700, 450)
+  await page.mouse.wheel(0, 520)
+  await page.waitForTimeout(1150)
+  const endOfForward = await closing.evaluate(el => el.getBoundingClientRect().top)
+  expect(Math.abs(endOfForward)).toBeLessThan(8)
+  await page.mouse.wheel(0, -520)
+  await page.waitForTimeout(1150)
+  const endOfBackward = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(Math.abs(endOfBackward)).toBeLessThan(8)
+})

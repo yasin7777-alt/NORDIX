@@ -751,3 +751,13 @@
   .nordix-join-button { min-width: 220px; }
   .nordix-join-arrow { width: 42px; height: 42px; flex-basis: 42px; }
 }
+
+
+/* Smooth full-screen hand-off: black invitation slides upward, white NORDIX follows. */
+html.nordix-final-scroll-active {
+  scroll-behavior: auto !important;
+  scroll-snap-type: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.nordix-final-scroll-active { scroll-behavior: auto !important; }
+}
