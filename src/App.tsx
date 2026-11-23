@@ -53,7 +53,7 @@ function Closing() {
       }
     }
   }, [])
-  return <LegacyMarkup html={closing.replace('__NORDIX_CLOSING_SVG__', import.meta.env.BASE_URL + 'closing.svg')} />
+  return <LegacyMarkup html={closing.replace('__NORDIX_CLOSING_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-art.png')} />
 }
 function Modals() { return <LegacyMarkup html={modals} /> }
 

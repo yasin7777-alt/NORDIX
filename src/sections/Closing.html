@@ -1,16 +1,12 @@
 <section id="closing" class="closing-screen" aria-labelledby="closing-title">
-  <h2 id="closing-title" class="closing-screen-reader-title">NORDIX</h2>
-  <!-- The exact original NORDIX artwork, displayed as one illustration. -->
-  <div class="closing-artboard">
-    <img class="closing-background" src="__NORDIX_CLOSING_SVG__" alt="" aria-hidden="true" draggable="false" />
-    <!-- Cover only the three rasterized text areas in the original artwork. -->
-    <div class="closing-cover closing-cover-cta" aria-hidden="true"></div>
-    <div class="closing-cover closing-cover-copyright" aria-hidden="true"></div>
-    <div class="closing-cover closing-cover-tagline" aria-hidden="true"></div>
-    <!-- This is a genuine navigable link, not part of the image. -->
-    <a class="closing-go nav-transition mag-btn" href="#directions" data-transition="КАТАЛОГ ПРОГРАММ" aria-label="Погнали — перейти к учебным модулям NORDIX">ПОГНАЛИ <span aria-hidden="true">→</span></a>
+  <h2 id="closing-title" class="closing-accessible-title">NORDIX</h2>
+  <!-- The approved graphic itself is preserved; wording remains real HTML. -->
+  <div class="closing-artboard" aria-hidden="true">
+    <img class="closing-background" src="__NORDIX_CLOSING_IMAGE__" alt="" draggable="false" />
   </div>
-  <!-- Selectable by site maintainers in HTML, unlike the background artwork. -->
+  <a class="closing-go nav-transition" href="#directions" data-transition="КАТАЛОГ ПРОГРАММ" aria-label="Погнали — перейти к учебным модулям NORDIX">
+    <span>ПОГНАЛИ</span><span class="closing-go-arrow" aria-hidden="true">→</span>
+  </a>
   <div class="closing-base">
     <small class="closing-copyright">© 2026 NORDIX</small>
     <small class="closing-tagline">Точность · Надёжность · Промышленный холод</small>
