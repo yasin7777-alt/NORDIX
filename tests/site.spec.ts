@@ -336,7 +336,7 @@ test('final course invitation and course link fit a narrow mobile screen', async
 })
 
 
-test('NORDIX final curtain follows the wheel and releases scrolling above the black block', async ({ page }) => {
+test('NORDIX curtain reveals with wheel and never traps scrolling upward', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
   const scene = page.locator('.nordix-final-scene')
@@ -346,47 +346,46 @@ test('NORDIX final curtain follows the wheel and releases scrolling above the bl
   await expect(closing).toHaveCount(1)
   await expect(closing).toHaveCSS('position', 'sticky')
 
-  // Measure positions relative to the live viewport; fonts/cards can shift
-  // document offsets asynchronously during page startup.
+  // Start from the browser's real bottom position. This avoids flaky
+  // anchors/layout offsets while images, fonts, and the header settle.
   await page.evaluate(() => {
     document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important')
-    const scene = document.querySelector('.nordix-final-scene')
-    if (!scene) throw new Error('Missing final scene')
-    // Explicit pixel position avoids the site's 100px scroll-padding used by navbar anchors.
-    window.scrollTo({ top: window.scrollY + scene.getBoundingClientRect().top, behavior: 'instant' })
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
   })
-  await page.waitForTimeout(250)
-  expect(Math.abs(await scene.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(4)
-  expect(Math.abs(await closing.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(4)
+  await page.waitForTimeout(300)
+  const atBottom = await page.evaluate(() => window.scrollY)
+  expect(atBottom).toBeGreaterThan(1000)
+
   await page.mouse.move(720, 450)
+  await page.mouse.wheel(0, -320)
+  await page.waitForTimeout(400)
+  const upOne = await page.evaluate(() => window.scrollY)
+  const footerTopOne = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(upOne).toBeLessThan(atBottom - 150)
 
-  await page.mouse.wheel(0, 320)
-  await page.waitForTimeout(450)
-  const firstFooterTop = await footer.evaluate(el => el.getBoundingClientRect().top)
-  expect(firstFooterTop).toBeLessThan(-150)
-  expect(firstFooterTop).toBeGreaterThan(-700)
-  expect(Math.abs(await closing.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(4)
+  await page.mouse.wheel(0, -320)
+  await page.waitForTimeout(400)
+  const upTwo = await page.evaluate(() => window.scrollY)
+  const footerTopTwo = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(upTwo).toBeLessThan(upOne - 150)
+  expect(footerTopTwo).toBeGreaterThan(footerTopOne + 150)
 
-  await page.mouse.wheel(0, 320)
-  await page.waitForTimeout(450)
-  const secondFooterTop = await footer.evaluate(el => el.getBoundingClientRect().top)
-  expect(secondFooterTop).toBeLessThan(firstFooterTop - 100)
+  // Scrolling down reverses the curtain and uncovers the white section.
+  await page.mouse.wheel(0, 240)
+  await page.waitForTimeout(400)
+  const downward = await page.evaluate(() => window.scrollY)
+  expect(downward).toBeGreaterThan(upTwo + 110)
 
-  await page.mouse.wheel(0, -300)
+  // Critical regression: wheel up must be able to pass the black invitation
+  // and continue into FAQ, not stop at its boundary.
+  await page.mouse.wheel(0, -2200)
   await page.waitForTimeout(450)
-  const reverseFooterTop = await footer.evaluate(el => el.getBoundingClientRect().top)
-  expect(reverseFooterTop).toBeGreaterThan(secondFooterTop + 100)
+  expect(await scene.evaluate(el => el.getBoundingClientRect().top)).toBeGreaterThan(100)
 
-  // Previously the wheel handler clamped scrolling at the beginning of this scene.
-  // The browser must now let the user continue into FAQ, past the black curtain.
-  await page.mouse.wheel(0, -1000)
+  const above = await page.evaluate(() => window.scrollY)
+  await page.mouse.wheel(0, 450)
   await page.waitForTimeout(450)
-  expect(await scene.evaluate(el => el.getBoundingClientRect().top)).toBeGreaterThan(120)
-  expect(await footer.evaluate(el => el.getBoundingClientRect().top)).toBeGreaterThan(120)
-
-  await page.mouse.wheel(0, 520)
-  await page.waitForTimeout(450)
-  expect(await scene.evaluate(el => el.getBoundingClientRect().top)).toBeLessThan(200)
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(above + 150)
 })
 
 test('keyboard navigation escapes the final block without a wheel lock', async ({ page }) => {
