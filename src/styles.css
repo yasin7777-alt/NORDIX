@@ -653,6 +653,11 @@
   background: rgba(61,117,216,.75);
   margin-left: 8px;
 }
+/* Shift just the oversized headline down, leaving the bottom copy/button in place. */
+@media (min-width: 1024px) {
+  .nordix-join-top { transform: translateY(clamp(25px, 6vh, 58px)); }
+}
+
 .nordix-join-title {
   width: 100%;
   margin: 0;
