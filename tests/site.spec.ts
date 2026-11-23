@@ -283,9 +283,16 @@ test('final NORDIX invitation uses black and blue branding and links to modules'
   // Match the giant lettering in the reference, not the former ~112px headline.
   expect(fontSize).toBeGreaterThanOrEqual(150)
   const headingBox = await heading.boundingBox()
-  if (!headingBox) throw new Error('The enlarged footer heading should have a visible layout')
+  const fullscreenBox = await invite.boundingBox()
+  const footerBox = await footer.boundingBox()
+  if (!headingBox || !fullscreenBox || !footerBox) throw new Error('The footer CTA should fill the viewport')
   expect(headingBox.x).toBeLessThan(145)
   expect(headingBox.x + headingBox.width).toBeLessThanOrEqual(1792)
+  // The full-black NORDIX invitation touches all viewport edges.
+  expect(Math.abs(fullscreenBox.x)).toBeLessThanOrEqual(2)
+  expect(Math.abs(fullscreenBox.width - 1792)).toBeLessThanOrEqual(2)
+  expect(Math.abs(fullscreenBox.height - 900)).toBeLessThanOrEqual(2)
+  expect(Math.abs(footerBox.height - fullscreenBox.height)).toBeLessThanOrEqual(2)
   await expect(footer.getByText('Отправить заявку')).toHaveCount(0)
   const metrics = await heading.locator(':scope > span').nth(1).evaluate(el => ({
     scrollWidth: el.scrollWidth, clientWidth: el.clientWidth,
@@ -306,7 +313,11 @@ test('final course invitation and course link fit a narrow mobile screen', async
   const [headingBox, ctaBox, descriptionBox] = await Promise.all([
     heading.boundingBox(), link.boundingBox(), invite.locator('.nordix-join-description').boundingBox(),
   ])
-  if (!headingBox || !ctaBox || !descriptionBox) throw new Error('Footer invitation should fit the mobile viewport')
+  const fullMobile = await invite.boundingBox()
+  if (!headingBox || !ctaBox || !descriptionBox || !fullMobile) throw new Error('Footer invitation should fit the mobile viewport')
+  expect(Math.abs(fullMobile.x)).toBeLessThanOrEqual(2)
+  expect(Math.abs(fullMobile.width - 390)).toBeLessThanOrEqual(2)
+  expect(fullMobile.height).toBeGreaterThanOrEqual(844)
   expect(headingBox.x).toBeGreaterThanOrEqual(0)
   expect(headingBox.x + headingBox.width).toBeLessThanOrEqual(390)
   expect(ctaBox.x).toBeGreaterThanOrEqual(0)
