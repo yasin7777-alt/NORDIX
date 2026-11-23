@@ -254,3 +254,52 @@ test('primary module CTA stays accessible without overlap on smaller screens', a
     expect(cta.y + cta.height).toBeLessThan(ticker.y)
   }
 })
+
+test('final NORDIX invitation uses black and blue branding and links to modules', async ({ page }) => {
+  await page.setViewportSize({ width: 1792, height: 900 })
+  await page.goto('/')
+  const footer = page.locator('footer')
+  const invite = footer.locator('.nordix-join-cta')
+  const heading = invite.locator('#nordix-join-title')
+  await expect(invite).toHaveCount(1)
+  await expect(heading).toHaveAttribute('aria-label', 'Готов врубиться в холод?')
+  await expect(heading.locator(':scope > span')).toHaveCount(3)
+  await expect(heading.locator(':scope > span').nth(0)).toHaveText('ГОТОВ')
+  await expect(heading.locator(':scope > span').nth(1)).toHaveText('ВРУБИТЬСЯ')
+  await expect(heading.locator(':scope > span').nth(2)).toHaveText('В ХОЛОД?')
+  await expect(invite.locator('.nordix-join-description')).toContainText('Начни с главного — с любопытства.')
+  await expect(invite.locator('.nordix-join-accent')).toHaveCSS('color', 'rgb(61, 117, 216)')
+  const cta = invite.locator('.nordix-join-button')
+  await expect(cta).toHaveAttribute('href', '#directions')
+  await expect(cta).toContainText('ПОГНАЛИ')
+  await expect(cta).toHaveCSS('background-color', 'rgb(61, 117, 216)')
+  await expect(footer.locator('img[alt="Логотип NORDIX"]')).toBeVisible()
+  await expect(footer.getByText('Все модули')).toHaveAttribute('href', '#directions')
+  await expect(footer.getByText('Отправить заявку')).toHaveCount(0)
+  const metrics = await heading.locator(':scope > span').nth(1).evaluate(el => ({
+    scrollWidth: el.scrollWidth, clientWidth: el.clientWidth,
+  }))
+  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 2)
+})
+
+test('final course invitation and course link fit a narrow mobile screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  const footer = page.locator('footer')
+  const invite = footer.locator('.nordix-join-cta')
+  const heading = invite.locator('.nordix-join-title')
+  const link = invite.locator('.nordix-join-button')
+  await expect(heading).toBeVisible()
+  await expect(link).toBeVisible()
+  const [headingBox, ctaBox, descriptionBox] = await Promise.all([
+    heading.boundingBox(), link.boundingBox(), invite.locator('.nordix-join-description').boundingBox(),
+  ])
+  if (!headingBox || !ctaBox || !descriptionBox) throw new Error('Footer invitation should fit the mobile viewport')
+  expect(headingBox.x).toBeGreaterThanOrEqual(0)
+  expect(headingBox.x + headingBox.width).toBeLessThanOrEqual(390)
+  expect(ctaBox.x).toBeGreaterThanOrEqual(0)
+  expect(ctaBox.x + ctaBox.width).toBeLessThanOrEqual(390)
+  expect(ctaBox.y).toBeGreaterThanOrEqual(descriptionBox.y + descriptionBox.height)
+  const overflow = await heading.locator(':scope > span').nth(1).evaluate(el => el.scrollWidth - el.clientWidth)
+  expect(overflow).toBeLessThanOrEqual(2)
+})
