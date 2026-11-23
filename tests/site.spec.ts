@@ -211,3 +211,46 @@ test('restored oversized headline and logo fit laptop and mobile screens', async
     }
   }
 })
+
+
+test('hero has only the primary CTA, placed to the right of its description on desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1792, height: 900 })
+  await page.goto('/')
+  const hero = page.locator('#hero')
+  const description = hero.locator('.hero-intro p')
+  const cta = hero.locator('.hero-module-cta')
+  await expect(hero.getByText('Что будем изучать')).toHaveCount(0)
+  await expect(hero.locator('button')).toHaveCount(0)
+  await expect(cta).toHaveCount(1)
+  await expect(cta).toContainText('Выбрать модуль')
+  await expect(cta).toHaveAttribute('href', '#directions')
+  const [descBox, ctaBox, tickerBox] = await Promise.all([
+    description.boundingBox(), cta.boundingBox(), page.locator('#hero-marquee').boundingBox(),
+  ])
+  if (!descBox || !ctaBox || !tickerBox) throw new Error('Description, CTA and ticker must all be visible')
+  expect(ctaBox.x).toBeGreaterThan(descBox.x + descBox.width - 2)
+  expect(ctaBox.x).toBeGreaterThan(570)
+  expect(ctaBox.x + ctaBox.width).toBeLessThan(980)
+  expect(Math.abs((ctaBox.y + ctaBox.height / 2) - (descBox.y + descBox.height / 2))).toBeLessThan(10)
+  expect(ctaBox.y + ctaBox.height).toBeLessThan(tickerBox.y)
+  await expect(hero.locator('.nordix-hero-video')).toBeVisible()
+})
+
+test('primary module CTA stays accessible without overlap on smaller screens', async ({ page }) => {
+  for (const size of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(size)
+    await page.goto('/')
+    const desc = await page.locator('#hero .hero-intro p').boundingBox()
+    const cta = await page.locator('#hero .hero-module-cta').boundingBox()
+    const ticker = await page.locator('#hero-marquee').boundingBox()
+    if (!desc || !cta || !ticker) throw new Error('Responsive primary CTA must exist')
+    expect(cta.x).toBeGreaterThanOrEqual(0)
+    expect(cta.x + cta.width).toBeLessThanOrEqual(size.width)
+    if (size.width >= 1024) {
+      expect(cta.x).toBeGreaterThanOrEqual(desc.x + desc.width - 2)
+    } else {
+      expect(cta.y).toBeGreaterThanOrEqual(desc.y + desc.height)
+    }
+    expect(cta.y + cta.height).toBeLessThan(ticker.y)
+  }
+})
