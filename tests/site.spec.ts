@@ -147,7 +147,7 @@ test('hero typography is larger but stays inside the first screen beside the ref
   expect(await fontSize('#hero .hero-status span.text-n800')).toBeGreaterThanOrEqual(15)
   expect(await fontSize('#hero .hero-intro p')).toBeGreaterThanOrEqual(20)
   expect(await fontSize('#hero .hero-intro a')).toBeGreaterThanOrEqual(13)
-  expect(await fontSize('#hero .hero-intro button')).toBeGreaterThanOrEqual(13)
+  await expect(page.locator('#hero .hero-intro button')).toHaveCount(0)
   const title = await page.locator('#hero .hero-title').boundingBox()
   const cta = await page.locator('#hero .hero-intro').boundingBox()
   const ticker = await page.locator('#hero-marquee').boundingBox()
