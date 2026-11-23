@@ -142,29 +142,158 @@
 
 
 
-/* NORDIX — editable full-screen closing page, matched to the original 1920×1080 reference. */
-#closing.closing-screen {position:relative;isolation:isolate;box-sizing:border-box;width:100%;height:100svh;min-height:650px;background:#fff;color:#000;overflow:hidden;}
-#closing .closing-art{position:absolute;z-index:0;display:block;pointer-events:none;fill:#000;}
-#closing .closing-art-left{top:0;left:0;width:23.70%;height:45.37%;}
-#closing .closing-art-upper{top:0;right:0;width:21.875%;height:36.12%;}
-#closing .closing-art-lower{bottom:0;right:0;width:13.542%;height:38.426%;}
-#closing .closing-infinity-large{left:81%;top:31.95%;width:13.802%;height:15%;z-index:1;filter:blur(2.4px);}
-#closing .closing-infinity-small{position:absolute;right:0.05%;bottom:0.5%;width:3.0%;height:auto;z-index:2;filter:blur(1.7px);}
-#closing .closing-content{position:absolute;z-index:3;left:5%;right:13%;top:46.8%;display:flex;flex-direction:column;align-items:stretch;}
-#closing .closing-name-wrap{position:relative;display:flex;justify-content:center;align-items:center;width:100%;line-height:1;}
-#closing .closing-title{position:relative;z-index:2;left:-1.1%;display:block;width:max-content;margin:0;color:#000;font-family:'Unbounded','Arial Black',Arial,sans-serif;font-size:clamp(65px,15.5vw,308px);font-weight:900;line-height:.99;letter-spacing:-.073em;white-space:nowrap;text-align:center;transform-origin:center center;}
-#closing .closing-drip{position:absolute;z-index:3;left:54.3%;bottom:-13.5%;width:clamp(42px,5.1vw,96px);height:auto;fill:#000;pointer-events:none;}
-#closing .closing-rule{width:88%;height:1px;background:#b3b3b3;margin:clamp(18px,2.6vh,34px) auto 0;}
-#closing .closing-go{position:relative;left:3.1%;align-self:center;display:inline-flex;align-items:center;gap:.38em;margin-top:clamp(19px,2.7vh,36px);color:#000;text-decoration:none;font-family:'Bad Script','Segoe Print',cursive;font-size:clamp(29px,3.1vw,60px);font-weight:400;line-height:1.35;letter-spacing:-.055em;transition:opacity .2s,translate .2s;}
-#closing .closing-go:hover,#closing .closing-go:focus-visible{opacity:.65;translate:5px 0;}
-#closing .closing-go span{font-family:Arial,sans-serif;font-size:1.0em;font-weight:300;line-height:1;letter-spacing:normal;}
-#closing .closing-base{position:absolute;z-index:4;left:2%;right:13%;bottom:1.9%;display:flex;align-items:end;justify-content:space-between;gap:14px;}
-#closing .closing-copyright{font-family:'Unbounded',Arial,sans-serif;font-weight:800;font-size:clamp(8px,.57vw,12px);line-height:1.5;letter-spacing:-.025em;white-space:nowrap;}
-#closing .closing-tagline{font-family:'Unbounded',Arial,sans-serif;font-weight:800;font-size:clamp(9px,.83vw,16px);line-height:1.35;letter-spacing:-.03em;color:#959595;text-align:right;}
-@media(max-width:1023px){#closing .closing-content{top:46%;left:4%;right:5%;}#closing .closing-title{font-size:15vw;}#closing .closing-go{left:0;}#closing .closing-base{right:4%;}#closing .closing-art-left{width:32%;height:35%;}#closing .closing-art-upper{width:30%;height:30%;}#closing .closing-art-lower{width:25%;height:38%;}#closing .closing-infinity-large{left:76%;top:33%;width:19%;height:13%;}}
-@media(max-width:600px){#closing.closing-screen{height:100svh;min-height:620px;}#closing .closing-content{top:44%;left:5%;right:5%;}#closing .closing-title{font-size:14vw;left:0;}#closing .closing-drip{width:33px;bottom:-17%;left:55%;}#closing .closing-rule{width:96%;margin-top:22px;}#closing .closing-go{font-size:clamp(27px,7vw,40px);margin-top:25px;}#closing .closing-art-left{width:62%;height:31%;}#closing .closing-art-upper{width:56%;height:30%;}#closing .closing-art-lower{width:43%;height:35%;}#closing .closing-infinity-large{width:23%;height:9%;top:31%;left:69%;}#closing .closing-infinity-small{width:9%;}#closing .closing-base{left:5%;right:5%;bottom:3%;flex-direction:column;align-items:flex-start;gap:8px;}#closing .closing-copyright{font-size:9px;}#closing .closing-tagline{font-size:9px;text-align:left;}}
-@media(prefers-reduced-motion:reduce){#closing .closing-go{transition:none;}}
-
+/* Fullscreen final section: use the original approved vector IMAGE unchanged.
+   Three white cover layers hide baked-in wording so the CTA/footer remain live HTML. */
+#closing.closing-screen {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100svh;
+  min-height: 650px;
+  isolation: isolate;
+  overflow: hidden;
+  background: #fff;
+  color: #000;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+#closing .closing-screen-reader-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+#closing .closing-artboard {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #fff;
+}
+#closing .closing-background {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#closing .closing-cover {
+  position: absolute;
+  display: block;
+  background: #fff;
+  z-index: 1;
+  pointer-events: none;
+}
+#closing .closing-cover-cta {
+  left: 37%;
+  top: 76.4%;
+  width: 27%;
+  height: 12%;
+}
+#closing .closing-cover-copyright {
+  left: 0;
+  bottom: 0;
+  width: 21%;
+  height: 7%;
+}
+#closing .closing-cover-tagline {
+  left: 58%;
+  bottom: 0;
+  width: 30.5%;
+  height: 7%;
+}
+#closing .closing-go {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  z-index: 3;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: .32em;
+  color: #000;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: 'Bad Script', 'Segoe Print', cursive;
+  font-size: clamp(29px, 3.3vw, 55px);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -.045em;
+  transition: opacity .2s ease;
+}
+#closing .closing-go span {
+  font-family: Arial, sans-serif;
+  font-size: .95em;
+  font-weight: 300;
+  letter-spacing: normal;
+}
+#closing .closing-go:hover,
+#closing .closing-go:focus-visible { opacity: .65; }
+#closing .closing-base {
+  position: absolute;
+  z-index: 5;
+  bottom: 1.9%;
+  left: 2%;
+  right: 13%;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  pointer-events: none;
+}
+#closing .closing-copyright,
+#closing .closing-tagline {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 800;
+  font-size: clamp(8px, .65vw, 13px);
+  line-height: 1.4;
+  letter-spacing: -.03em;
+}
+#closing .closing-copyright { color: #000; white-space: nowrap; }
+#closing .closing-tagline { color: #929292; text-align: right; }
+@media(max-width: 600px) {
+  #closing.closing-screen { min-height: 640px; }
+  /* On a narrow screen retain the whole reference image rather than crop it. */
+  #closing .closing-artboard {
+    inset: auto 0 auto;
+    top: 27%;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+  #closing .closing-go {
+    top: 79%;
+    font-size: clamp(25px, 7.4vw, 35px);
+  }
+  #closing .closing-cover-cta {
+    left: 27%;
+    width: 46%;
+    top: 76%;
+    height: 18%;
+  }
+  #closing .closing-base {
+    bottom: 4%;
+    left: 5%;
+    right: 5%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+  }
+  #closing .closing-copyright,
+  #closing .closing-tagline { font-size: 9px; text-align: left; }
+}
+@media(prefers-reduced-motion: reduce) {
+  #closing .closing-go { transition: none; }
+}
 
     /* Bring the hero toward the left edge and reduce the gap before the ticker. */
     #hero {padding-bottom:32px;}

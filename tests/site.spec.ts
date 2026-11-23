@@ -10,11 +10,13 @@ test('original page sections, six modules and primary navigation still exist', a
   await expect(page.locator('#faq')).toHaveCount(1)
   await expect(page.locator('#closing')).toHaveCount(1)
   await expect(page.locator('#courses-grid .course-card')).toHaveCount(6)
-  await expect(page.locator('#closing img')).toHaveCount(0)
-  await expect(page.locator('#closing .closing-title')).toHaveText('NORDIX')
-  await expect(page.locator('#closing .closing-art')).toHaveCount(4)
-  await expect(page.locator('#closing .closing-infinity-small')).toHaveCount(1)
+  await expect(page.locator('#closing .closing-background')).toHaveAttribute('src', /closing\.svg$/)
+  await expect(page.locator('#closing .closing-background')).toHaveAttribute('draggable', 'false')
+  await expect(page.locator('#closing .closing-cover')).toHaveCount(3)
+  await expect(page.locator('#closing #closing-title')).toHaveText('NORDIX')
   await expect(page.locator('#closing .closing-go')).toHaveAttribute('href', '#directions')
+  await expect(page.locator('#closing .closing-copyright')).toHaveText('© 2026 NORDIX')
+  await expect(page.locator('#closing .closing-tagline')).toHaveText('Точность · Надёжность · Промышленный холод')
 })
 
 test('course filter and course-details modal still work', async ({ page }) => {

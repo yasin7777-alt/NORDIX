@@ -40,23 +40,20 @@ function Faq() { return <LegacyMarkup html={faq} /> }
 function Footer() { return <LegacyMarkup html={footer} /> }
 function Closing() {
   useEffect(() => {
-    const title = document.getElementById('closing-title')
-    const wrapper = title?.parentElement
-    if (!title || !wrapper) return
-    const fit = () => {
-      title.style.transform = 'none'
-      const naturalWidth = title.getBoundingClientRect().width
-      const availableWidth = wrapper.clientWidth * 0.96
-      if (naturalWidth > 0) title.style.transform = `scaleX(${availableWidth / naturalWidth})`
+    const section = document.getElementById('closing')
+    if (!section) return
+    // Discourage casual copying without interrupting the interactive course link.
+    const prevent = (event: Event) => event.preventDefault()
+    for (const eventName of ['contextmenu', 'dragstart', 'copy']) {
+      section.addEventListener(eventName, prevent)
     }
-    fit()
-    const observer = new ResizeObserver(fit)
-    observer.observe(wrapper)
-    void document.fonts.ready.then(fit)
-    window.addEventListener('resize', fit)
-    return () => { observer.disconnect(); window.removeEventListener('resize', fit) }
+    return () => {
+      for (const eventName of ['contextmenu', 'dragstart', 'copy']) {
+        section.removeEventListener(eventName, prevent)
+      }
+    }
   }, [])
-  return <LegacyMarkup html={closing} />
+  return <LegacyMarkup html={closing.replace('__NORDIX_CLOSING_SVG__', import.meta.env.BASE_URL + 'closing.svg')} />
 }
 function Modals() { return <LegacyMarkup html={modals} /> }
 
