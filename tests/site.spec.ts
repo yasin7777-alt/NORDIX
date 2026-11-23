@@ -10,7 +10,10 @@ test('original page sections, six modules and primary navigation still exist', a
   await expect(page.locator('#faq')).toHaveCount(1)
   await expect(page.locator('#closing')).toHaveCount(1)
   await expect(page.locator('#courses-grid .course-card')).toHaveCount(6)
-  await expect(page.locator('#closing img.closing-vector')).toHaveAttribute('src', /closing\.svg$/)
+  await expect(page.locator('#closing img')).toHaveCount(0)
+  await expect(page.locator('#closing .closing-title')).toHaveText('NORDIX')
+  await expect(page.locator('#closing .closing-mark use')).toHaveCount(5)
+  await expect(page.locator('#closing .closing-go')).toHaveAttribute('href', '#directions')
 })
 
 test('course filter and course-details modal still work', async ({ page }) => {

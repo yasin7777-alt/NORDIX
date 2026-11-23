@@ -39,7 +39,24 @@ function LearningPlan() { return <LegacyMarkup html={learningPlan} /> }
 function Faq() { return <LegacyMarkup html={faq} /> }
 function Footer() { return <LegacyMarkup html={footer} /> }
 function Closing() {
-  return <LegacyMarkup html={closing.replace('__NORDIX_CLOSING_SVG__', import.meta.env.BASE_URL + 'closing.svg')} />
+  useEffect(() => {
+    const title = document.getElementById('closing-title')
+    const wrapper = title?.parentElement
+    if (!title || !wrapper) return
+    const fit = () => {
+      title.style.transform = 'none'
+      const naturalWidth = title.getBoundingClientRect().width
+      const availableWidth = wrapper.clientWidth * 0.96
+      if (naturalWidth > 0) title.style.transform = `scaleX(${availableWidth / naturalWidth})`
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(wrapper)
+    void document.fonts.ready.then(fit)
+    window.addEventListener('resize', fit)
+    return () => { observer.disconnect(); window.removeEventListener('resize', fit) }
+  }, [])
+  return <LegacyMarkup html={closing} />
 }
 function Modals() { return <LegacyMarkup html={modals} /> }
 
