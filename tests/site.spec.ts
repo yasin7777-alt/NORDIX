@@ -318,11 +318,28 @@ test('final course invitation and course link fit a narrow mobile screen', async
   await expect(heading).toBeVisible()
   await expect(link).toBeVisible()
   await expect(footer.locator('img[alt="Логотип NORDIX"]')).toHaveCount(0)
-  const [headingBox, ctaBox, descriptionBox] = await Promise.all([
-    heading.boundingBox(), link.boundingBox(), invite.locator('.nordix-join-description').boundingBox(),
-  ])
-  const fullMobile = await invite.boundingBox()
-  if (!headingBox || !ctaBox || !descriptionBox || !fullMobile) throw new Error('Footer invitation should fit the mobile viewport')
+  await page.evaluate(() => document.fonts.ready)
+
+  // Read all rectangles in one browser frame. Measuring them through
+  // parallel Playwright calls can combine different scroll positions.
+  const geometry = await invite.evaluate(el => {
+    const title = el.querySelector<HTMLElement>('.nordix-join-title')!
+    const button = el.querySelector<HTMLElement>('.nordix-join-button')!
+    const description = el.querySelector<HTMLElement>('.nordix-join-description')!
+    const rect = (element: Element) => {
+      const r = element.getBoundingClientRect()
+      return { x: r.x, y: r.y, width: r.width, height: r.height }
+    }
+    const middleLine = title.querySelectorAll(':scope > span')[1] as HTMLElement
+    return {
+      fullMobile: rect(el),
+      headingBox: rect(title),
+      ctaBox: rect(button),
+      descriptionBox: rect(description),
+      headingOverflow: middleLine.scrollWidth - middleLine.clientWidth,
+    }
+  })
+  const { fullMobile, headingBox, ctaBox, descriptionBox, headingOverflow } = geometry
   expect(Math.abs(fullMobile.x)).toBeLessThanOrEqual(2)
   expect(Math.abs(fullMobile.width - 390)).toBeLessThanOrEqual(2)
   expect(fullMobile.height).toBeGreaterThanOrEqual(844)
@@ -331,8 +348,7 @@ test('final course invitation and course link fit a narrow mobile screen', async
   expect(ctaBox.x).toBeGreaterThanOrEqual(0)
   expect(ctaBox.x + ctaBox.width).toBeLessThanOrEqual(390)
   expect(ctaBox.y).toBeGreaterThanOrEqual(descriptionBox.y + descriptionBox.height)
-  const overflow = await heading.locator(':scope > span').nth(1).evaluate(el => el.scrollWidth - el.clientWidth)
-  expect(overflow).toBeLessThanOrEqual(2)
+  expect(headingOverflow).toBeLessThanOrEqual(2)
 })
 
 
