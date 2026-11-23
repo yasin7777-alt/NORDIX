@@ -391,12 +391,22 @@
     height: .68em;
     width: auto;
   }
+  /* Keep a single primary CTA to the RIGHT of the description, in the
+     annotated area, instead of leaving buttons on a row underneath. */
   #hero .hero-intro {
-    max-width: min(53vw, 760px);
+    max-width: min(57vw, 820px);
     margin-top: clamp(24px, 3.5vh, 40px);
   }
   #hero .hero-intro > .reveal-up {
-    display: block;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: clamp(16px, 1.5vw, 28px);
+    align-items: center;
+  }
+  #hero .hero-intro .hero-module-cta {
+    justify-self: start;
+    white-space: nowrap;
+    margin-top: 0;
   }
   #hero .hero-intro p {
     max-width: 620px;
@@ -423,6 +433,9 @@
   #hero .hero-title > span:nth-child(2) { font-size: 1em; }
 }
 @media (max-width: 1023px) {
+  /* On narrower screens the CTA returns below the paragraph to avoid
+     encroaching on the fridge video or shrinking the paragraph too far. */
+  #hero .hero-intro .hero-module-cta { margin-top: 20px; }
   #hero .hero-title { font-size: 7vw; line-height: 1.1; }
   #hero .hero-title > span { display: block; white-space: nowrap; }
   #hero .hero-title > span:nth-child(2) { display: flex; align-items: center; font-size: 1em; letter-spacing: -.05em; }
