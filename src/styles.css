@@ -535,6 +535,10 @@
   font-weight: 600;
   line-height: 1.6;
 }
+/* Raise only the closing invitation copy, preserving the CTA button position. */
+@media (min-width: 1024px) {
+  .nordix-join-description { transform: translateY(-36px); }
+}
 .nordix-join-button {
   display: inline-flex;
   flex-shrink: 0;
