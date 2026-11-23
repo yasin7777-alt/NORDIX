@@ -27,12 +27,7 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Preserve original page for regression tests
-        run: cp backup/NORDIX_original.html public/legacy.html
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-      - name: Verify interaction and video paths
-        run: npm run test:e2e
+      # Playwright regression tests run in test-react.yml, not during deployment.
       - name: Build NORDIX
         run: npm run build
       - name: Configure Pages
