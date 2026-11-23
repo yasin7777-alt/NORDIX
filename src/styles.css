@@ -470,8 +470,8 @@
 .nordix-join-cta {
   position: relative;
   isolation: isolate;
-  min-height: clamp(520px, 74svh, 790px);
-  padding: clamp(16px, 3vh, 42px) 0 clamp(48px, 8vh, 88px);
+  min-height: clamp(735px, 87svh, 930px);
+  padding: clamp(20px, 3vh, 42px) 0 clamp(42px, 7vh, 76px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -503,7 +503,7 @@
   width: 100%;
   margin: 0;
   color: #fdfcfc;
-  font-size: clamp(54px, 6.25vw, 112px);
+  font-size: clamp(80px, 9.1vw, 168px);
   font-weight: 900;
   line-height: 1.01;
   letter-spacing: -.058em;
@@ -571,7 +571,7 @@
     min-height: clamp(470px, 67svh, 680px);
     padding: 24px 0 62px;
   }
-  .nordix-join-title { font-size: clamp(31px, 7.6vw, 80px); }
+  .nordix-join-title { font-size: clamp(42px, 8.25vw, 96px); }
   .nordix-join-bottom { align-items: flex-start; }
 }
 @media (max-width: 600px) {
@@ -582,7 +582,7 @@
   }
   .nordix-join-eyebrow { margin-bottom: 32px; }
   .nordix-join-title {
-    font-size: clamp(26px, 7.9vw, 44px);
+    font-size: clamp(28px, 8.2vw, 44px);
     letter-spacing: -.07em;
   }
   .nordix-join-bottom {
