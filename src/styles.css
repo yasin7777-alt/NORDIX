@@ -191,7 +191,7 @@
 #closing .closing-go {
   position: absolute;
   z-index: 3;
-  top: 77.3%;
+  top: 84%;
   left: 50%;
   transform: translateX(-50%);
   display: inline-flex;
