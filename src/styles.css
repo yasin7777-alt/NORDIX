@@ -470,8 +470,11 @@
 .nordix-join-cta {
   position: relative;
   isolation: isolate;
-  min-height: clamp(735px, 87svh, 930px);
-  padding: clamp(20px, 3vh, 42px) 0 clamp(42px, 7vh, 76px);
+  /* Full-bleed section: one entire viewport with no surrounding gutters. */
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100svh;
+  padding: clamp(28px, 4.6vh, 58px) clamp(22px, 4.35vw, 82px) clamp(34px, 7vh, 74px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -568,17 +571,17 @@
 .nordix-join-arrow svg { width: 21px; height: 21px; }
 @media (max-width: 1023px) {
   .nordix-join-cta {
-    min-height: clamp(470px, 67svh, 680px);
-    padding: 24px 0 62px;
+    min-height: 100svh;
+    padding: 28px clamp(20px, 4.35vw, 48px) 58px;
   }
   .nordix-join-title { font-size: clamp(42px, 8.25vw, 96px); }
   .nordix-join-bottom { align-items: flex-start; }
 }
 @media (max-width: 600px) {
   .nordix-join-cta {
-    min-height: 520px;
+    min-height: 100svh;
     gap: 48px;
-    padding: 12px 0 46px;
+    padding: 30px 20px 48px;
   }
   .nordix-join-eyebrow { margin-bottom: 32px; }
   .nordix-join-title {
