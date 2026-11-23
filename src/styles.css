@@ -753,10 +753,39 @@
 }
 
 
-/* Smooth full-screen hand-off: black invitation slides upward, white NORDIX follows. */
+/*
+ * NORDIX closing: the black invitation is the moving curtain.
+ * White artwork stays in exactly the same place underneath it.
+ * As you scroll down, the curtain rises; scrolling up lowers it again.
+ * The scroll position, not a timed state change, controls the reveal.
+ */
+.nordix-final-scene {
+  position: relative;
+  isolation: isolate;
+  height: 200svh;
+  background: #fff;
+}
+.nordix-final-scene footer {
+  position: relative;
+  z-index: 2;
+}
+.nordix-final-scene #closing.closing-screen {
+  position: sticky;
+  top: 0;
+  margin-top: -100svh;
+  z-index: 1;
+}
 html.nordix-final-scroll-active {
   scroll-behavior: auto !important;
   scroll-snap-type: none !important;
+}
+@media (max-width: 700px) {
+  .nordix-final-scene { height: auto; }
+  .nordix-final-scene #closing.closing-screen {
+    position: relative;
+    top: auto;
+    margin-top: 0;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   html.nordix-final-scroll-active { scroll-behavior: auto !important; }

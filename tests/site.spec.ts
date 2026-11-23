@@ -335,23 +335,49 @@ test('final course invitation and course link fit a narrow mobile screen', async
 })
 
 
-test('last two NORDIX sections glide vertically in both directions like the reference', async ({ page }) => {
+test('NORDIX black curtain reveals pinned white final block proportionally to the wheel', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
-  const footer = page.locator('footer')
-  const closing = page.locator('#closing')
-  const footerY = await footer.evaluate(el => window.scrollY + el.getBoundingClientRect().top)
+  const scene = page.locator('.nordix-final-scene')
+  const footer = scene.locator('footer')
+  const closing = scene.locator('#closing')
+  await expect(footer).toHaveCount(1)
+  await expect(closing).toHaveCount(1)
+  await expect(closing).toHaveCSS('position', 'sticky')
+
+  const startY = await scene.evaluate(el => el.getBoundingClientRect().top + window.scrollY)
   await page.evaluate(y => {
     document.documentElement.style.scrollBehavior = 'auto'
     window.scrollTo(0, y)
-  }, footerY)
-  await page.mouse.move(700, 450)
-  await page.mouse.wheel(0, 520)
-  await page.waitForTimeout(1150)
-  const endOfForward = await closing.evaluate(el => el.getBoundingClientRect().top)
-  expect(Math.abs(endOfForward)).toBeLessThan(8)
-  await page.mouse.wheel(0, -520)
-  await page.waitForTimeout(1150)
-  const endOfBackward = await footer.evaluate(el => el.getBoundingClientRect().top)
-  expect(Math.abs(endOfBackward)).toBeLessThan(8)
+  }, startY)
+  await page.waitForTimeout(100)
+  const initialWhite = await closing.evaluate(el => el.getBoundingClientRect().top)
+  expect(Math.abs(initialWhite)).toBeLessThanOrEqual(3)
+
+  await page.mouse.move(720, 450)
+  await page.mouse.wheel(0, 300)
+  await page.waitForTimeout(650)
+  const firstMove = await footer.evaluate(el => el.getBoundingClientRect().top)
+  const pinned = await closing.evaluate(el => el.getBoundingClientRect().top)
+  expect(firstMove).toBeLessThan(-160)
+  expect(firstMove).toBeGreaterThan(-700)
+  expect(Math.abs(pinned)).toBeLessThanOrEqual(3)
+
+  await page.mouse.wheel(0, 240)
+  await page.waitForTimeout(650)
+  const secondMove = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(secondMove).toBeLessThan(firstMove - 150)
+
+  await page.mouse.wheel(0, -300)
+  await page.waitForTimeout(700)
+  const reverseMove = await footer.evaluate(el => el.getBoundingClientRect().top)
+  expect(reverseMove).toBeGreaterThan(secondMove + 160)
+  expect(Math.abs(await closing.evaluate(el => el.getBoundingClientRect().top))).toBeLessThanOrEqual(3)
+})
+
+test('NORDIX mobile final block remains in normal document flow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  await expect(page.locator('.nordix-final-scene')).toHaveCSS('height', /auto|[0-9]+px/)
+  await expect(page.locator('#closing')).toHaveCSS('position', 'relative')
 })

@@ -94,8 +94,10 @@ export function App() {
       <Methodology />
       <LearningPlan />
       <Faq />
-      <Footer />
-      <Closing />
+      <div className="nordix-final-scene">
+        <Footer />
+        <Closing />
+      </div>
       <Modals />
     </>
   )

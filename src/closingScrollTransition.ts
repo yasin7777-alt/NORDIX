@@ -1,94 +1,92 @@
 /**
- * Reference-based scroll transition for the last two NORDIX sections.
- * Like the Freshman video: both sections remain in document flow,
- * the new full-screen section rises from below, and the movement eases to rest.
- * It does not create a covering splash/wipe or change the artwork.
+ * The last NORDIX transition is a scroll-controlled curtain, not a 1-shot
+ * page jump. CSS pins the white closing artwork behind the black invitation.
+ * Mouse-wheel deltas move the document with easing; releasing the wheel
+ * simply ends the glide at the exact distance requested.
  */
 export function installClosingScrollTransition(): () => void {
-  const footer = document.querySelector<HTMLElement>('footer')
-  const closing = document.getElementById('closing')
-  if (!footer || !closing) return () => {}
+  const scene = document.querySelector<HTMLElement>('.nordix-final-scene')
+  if (!scene) return () => {}
 
   const root = document.documentElement
-  const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)')
-  let animationFrame = 0
-  let transitioning = false
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+  const wheelDevice = window.matchMedia('(min-width: 701px) and (hover: hover) and (pointer: fine)')
+  let targetY: number | null = null
+  let raf = 0
+  let lastTime = 0
 
-  const absoluteTop = (element: Element) =>
-    window.scrollY + element.getBoundingClientRect().top
-
-  const release = () => {
-    transitioning = false
+  const stop = () => {
+    if (raf) cancelAnimationFrame(raf)
+    raf = 0
+    lastTime = 0
+    targetY = null
     root.classList.remove('nordix-final-scroll-active')
-    animationFrame = 0
   }
 
-  const glideTo = (targetY: number) => {
-    const originY = window.scrollY
-    const distance = targetY - originY
-    if (Math.abs(distance) < 2) return
-
-    transitioning = true
-    root.classList.add('nordix-final-scroll-active')
-    const started = performance.now()
-    const duration = 950
-
-    const frame = (now: number) => {
-      const progress = Math.min(1, (now - started) / duration)
-      // Ease-out cubic — fast at first, gentle stop, as in the supplied clip.
-      const eased = 1 - Math.pow(1 - progress, 3)
-      window.scrollTo(0, originY + distance * eased)
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(frame)
-      } else {
-        window.scrollTo(0, targetY)
-        release()
-      }
+  const animate = (now: number) => {
+    if (targetY === null) {
+      stop()
+      return
     }
-    animationFrame = requestAnimationFrame(frame)
+    const dt = lastTime ? Math.min(50, now - lastTime) : 16
+    lastTime = now
+    const currentY = window.scrollY
+    const difference = targetY - currentY
+    if (Math.abs(difference) < 0.75) {
+      window.scrollTo(0, targetY)
+      stop()
+      return
+    }
+    // Frame-rate independent ease-out; more wheel ticks update the destination.
+    const amount = 1 - Math.exp(-dt / 145)
+    window.scrollTo(0, currentY + difference * amount)
+    raf = requestAnimationFrame(animate)
   }
 
   const onWheel = (event: WheelEvent) => {
-    // Let zoom gestures, accessibility settings, touch and other pages scroll normally.
-    if (motion.matches || !finePointer.matches || event.ctrlKey) return
-    if (!event.cancelable || Math.abs(event.deltaY) < 1) return
-
-    if (transitioning) {
-      event.preventDefault()
+    if (reducedMotion.matches || !wheelDevice.matches || event.ctrlKey || event.metaKey) {
       return
     }
-
-    // Do not move the page while an interactive modal is open.
+    if (!event.cancelable || Math.abs(event.deltaY) < 1) return
     if (document.querySelector('#enroll-modal:not(.hidden), #video-modal:not(.hidden)')) return
 
-    const viewport = window.innerHeight
+    const startY = scene.getBoundingClientRect().top + window.scrollY
+    const endY = Math.min(
+      startY + window.innerHeight,
+      document.documentElement.scrollHeight - window.innerHeight,
+    )
     const currentY = window.scrollY
-    const footerY = absoluteTop(footer)
-    const closingY = absoluteTop(closing)
+    // Don't interfere with normal scroll outside the final two sections.
+    if (currentY < startY - 2 || currentY > endY + 2) {
+      if (raf) stop()
+      return
+    }
+    if (event.deltaY > 0 && currentY >= endY - 1 && !raf) return
+    if (event.deltaY < 0 && currentY <= startY + 1 && !raf) return
 
-    // Only the black invitation and the following white closing are affected.
-    if (
-      event.deltaY > 0 &&
-      currentY >= footerY - 8 &&
-      currentY < closingY - viewport * .1
-    ) {
-      event.preventDefault()
-      glideTo(closingY)
-    } else if (
-      event.deltaY < 0 &&
-      currentY >= footerY + viewport * .89 &&
-      currentY <= closingY + viewport * .2
-    ) {
-      event.preventDefault()
-      glideTo(footerY)
+    event.preventDefault()
+    const delta = event.deltaMode === 1
+      ? event.deltaY * 16
+      : event.deltaMode === 2
+        ? event.deltaY * window.innerHeight
+        : event.deltaY
+    // Avoid giant jumps from fast wheel/touchpad input; keep reveal proportional.
+    const step = Math.max(-280, Math.min(280, delta * 1.25))
+    targetY = Math.max(startY, Math.min(endY, (targetY ?? currentY) + step))
+    if (!raf) {
+      lastTime = 0
+      root.classList.add('nordix-final-scroll-active')
+      raf = requestAnimationFrame(animate)
     }
   }
 
   window.addEventListener('wheel', onWheel, { passive: false })
+  window.addEventListener('touchstart', stop, { passive: true })
+  window.addEventListener('keydown', stop)
   return () => {
     window.removeEventListener('wheel', onWheel)
-    if (animationFrame) cancelAnimationFrame(animationFrame)
-    release()
+    window.removeEventListener('touchstart', stop)
+    window.removeEventListener('keydown', stop)
+    stop()
   }
 }
