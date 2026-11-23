@@ -7,6 +7,7 @@ on:
       - feature/hero-fridge-video
       - deploy/nordix-pages
       - main
+      - design/blue-footer-course-invitation
       - fix/hero-inline-module-cta
       - style/hero-title-slightly-smaller-and-copy-v5
       - fix/restore-original-hero-logo-title
