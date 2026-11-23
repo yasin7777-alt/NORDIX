@@ -273,8 +273,19 @@ test('final NORDIX invitation uses black and blue branding and links to modules'
   await expect(cta).toHaveAttribute('href', '#directions')
   await expect(cta).toContainText('ПОГНАЛИ')
   await expect(cta).toHaveCSS('background-color', 'rgb(61, 117, 216)')
-  await expect(footer.locator('img[alt="Логотип NORDIX"]')).toBeVisible()
-  await expect(footer.getByText('Все модули')).toHaveAttribute('href', '#directions')
+  // The entire boxed logo/navigation strip from the screenshot is removed.
+  await expect(footer.locator('img[alt="Логотип NORDIX"]')).toHaveCount(0)
+  await expect(footer.getByText('Все модули')).toHaveCount(0)
+  await expect(footer.getByText('О методологии')).toHaveCount(0)
+  await expect(footer.getByText('План изучения')).toHaveCount(0)
+  await expect(footer.getByText('Вопросы и ответы')).toHaveCount(0)
+  const fontSize = Number(await heading.evaluate(el => parseFloat(getComputedStyle(el).fontSize)))
+  // Match the giant lettering in the reference, not the former ~112px headline.
+  expect(fontSize).toBeGreaterThanOrEqual(150)
+  const headingBox = await heading.boundingBox()
+  if (!headingBox) throw new Error('The enlarged footer heading should have a visible layout')
+  expect(headingBox.x).toBeLessThan(145)
+  expect(headingBox.x + headingBox.width).toBeLessThanOrEqual(1792)
   await expect(footer.getByText('Отправить заявку')).toHaveCount(0)
   const metrics = await heading.locator(':scope > span').nth(1).evaluate(el => ({
     scrollWidth: el.scrollWidth, clientWidth: el.clientWidth,
@@ -291,6 +302,7 @@ test('final course invitation and course link fit a narrow mobile screen', async
   const link = invite.locator('.nordix-join-button')
   await expect(heading).toBeVisible()
   await expect(link).toBeVisible()
+  await expect(footer.locator('img[alt="Логотип NORDIX"]')).toHaveCount(0)
   const [headingBox, ctaBox, descriptionBox] = await Promise.all([
     heading.boundingBox(), link.boundingBox(), invite.locator('.nordix-join-description').boundingBox(),
   ])
