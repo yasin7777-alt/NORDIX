@@ -29,14 +29,14 @@ function Header() { return <LegacyMarkup html={header} /> }
 function MobileMenu() { return <LegacyMarkup html={mobileMenu} /> }
 function Hero() {
   // Respect the Vite base path when hosted under /NORDIX/ on GitHub Pages.
-  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-hero-4k.mp4'
+  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-fridge.mp4'
   return <LegacyMarkup html={hero.replace('__NORDIX_FRIDGE_VIDEO__', videoUrl)} />
 }
 function Ticker() { return <LegacyMarkup html={ticker} /> }
 function Programs() { return <LegacyMarkup html={programs} /> }
 function Methodology() { return <LegacyMarkup html={methodology} /> }
 function LearningPlan() {
-  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-hero-4k.mp4'
+  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-logo-motion.mp4'
   return <LegacyMarkup html={learningPlan.replace('__NORDIX_MOTION_VIDEO__', videoUrl)} />
 }
 function Faq() { return <LegacyMarkup html={faq} /> }

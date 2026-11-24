@@ -45,7 +45,7 @@ test('trajectory uses a full-screen passive video and FAQ arrows remain interact
   await expect(player).toHaveAttribute('muted', '')
   await expect(player).toHaveAttribute('loop', '')
   await expect(player).not.toHaveAttribute('controls', '')
-  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-hero-4k.mp4')
+  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-logo-motion.mp4')
   await expect(player).toHaveCSS('pointer-events', 'none')
   await expect(section.locator('.nordix-motion-frame')).toHaveCSS('border-radius', '0px')
   const box = await section.boundingBox()
@@ -98,7 +98,7 @@ test('compressed 4K logo video fills the hero background', async ({ page }) => {
   await expect(player).toHaveAttribute('muted', '')
   await expect(player).toHaveAttribute('loop', '')
   await expect(player).toHaveAttribute('playsinline', '')
-  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-hero-4k.mp4')
+  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-logo-motion.mp4')
   const heroBox = await hero.boundingBox()
   const videoBox = await background.boundingBox()
   if (!heroBox || !videoBox) throw new Error('Hero background and page need visible dimensions')
@@ -136,14 +136,19 @@ test('fridge video remains a background on mobile, never a separate block', asyn
   await expect(page.locator('#hero .hero-intro')).toBeVisible()
 })
 
-test('compressed 4K logo video is served directly as an MP4', async ({ page }) => {
+test('distinct refrigerator and NORDIX motion videos load from their real paths', async ({ page }) => {
   await page.goto('/')
   const source = page.locator('#hero video source')
-  await expect(source).toHaveAttribute('src', '/NORDIX/videos/nordix-hero-4k.mp4')
-  const response = await page.request.head('/NORDIX/videos/nordix-hero-4k.mp4')
+  await expect(source).toHaveAttribute('src', '/NORDIX/videos/nordix-fridge.mp4')
+  const response = await page.request.head('/NORDIX/videos/nordix-fridge.mp4')
   expect(response.ok()).toBeTruthy()
   expect(response.headers()['content-type']).toContain('video/mp4')
-  expect(Number(response.headers()['content-length'])).toBeGreaterThan(29_000_000)
+  expect(Number(response.headers()['content-length'])).toBeGreaterThan(15_000_000)
+  const trajectoryVideo = page.locator('#calculator .nordix-motion-player source')
+  await expect(trajectoryVideo).toHaveAttribute('src', '/NORDIX/videos/nordix-logo-motion.mp4')
+  const motionResponse = await page.request.head('/NORDIX/videos/nordix-logo-motion.mp4')
+  expect(motionResponse.ok()).toBeTruthy()
+  expect(motionResponse.headers()['content-type']).toContain('video/mp4')
 })
 
 test('ticker is visible at the very bottom of the opening viewport, like SYS/LAB', async ({ page }) => {
