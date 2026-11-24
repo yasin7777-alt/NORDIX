@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/split-closing-art.mjs && vite",
-    "build": "node scripts/split-closing-art.mjs && tsc --noEmit && vite build",
+    "dev": "node scripts/assemble-hero-video.mjs && node scripts/split-closing-art.mjs && vite",
+    "build": "node scripts/assemble-hero-video.mjs && node scripts/split-closing-art.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test:e2e": "playwright test"
   },

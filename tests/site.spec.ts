@@ -36,6 +36,7 @@ test('course filter and course-details modal still work', async ({ page }) => {
 })
 
 test('trajectory uses a full-screen passive video and FAQ arrows remain interactive', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/')
   const section = page.locator('#calculator')
   const player = section.locator('.nordix-motion-player')
@@ -44,8 +45,13 @@ test('trajectory uses a full-screen passive video and FAQ arrows remain interact
   await expect(player).toHaveAttribute('muted', '')
   await expect(player).toHaveAttribute('loop', '')
   await expect(player).not.toHaveAttribute('controls', '')
-  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-logo-motion.mp4')
+  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-hero-4k.mp4')
   await expect(player).toHaveCSS('pointer-events', 'none')
+  await expect(section.locator('.nordix-motion-frame')).toHaveCSS('border-radius', '0px')
+  const box = await section.boundingBox()
+  if (!box) throw new Error('Video section layout missing')
+  expect(box.width).toBe(1920)
+  expect(box.height).toBe(1080)
   const items = page.locator('#faq .accordion-item')
   await expect(items).toHaveCount(4)
   await expect(items.nth(0)).toHaveAttribute('aria-expanded', 'true')
@@ -80,7 +86,7 @@ test('original and migrated page have the same section order', async ({ page }) 
   expect(reactLayout).toEqual(originalLayout)
 })
 
-test('logo motion video is the full-screen background behind the hero headlines', async ({ page }) => {
+test('compressed 4K logo video fills the hero background', async ({ page }) => {
   await page.setViewportSize({ width: 1792, height: 900 })
   await page.goto('/')
   const hero = page.locator('#hero')
@@ -92,7 +98,7 @@ test('logo motion video is the full-screen background behind the hero headlines'
   await expect(player).toHaveAttribute('muted', '')
   await expect(player).toHaveAttribute('loop', '')
   await expect(player).toHaveAttribute('playsinline', '')
-  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-logo-motion.mp4')
+  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-hero-4k.mp4')
   const heroBox = await hero.boundingBox()
   const videoBox = await background.boundingBox()
   if (!heroBox || !videoBox) throw new Error('Hero background and page need visible dimensions')
@@ -130,14 +136,14 @@ test('fridge video remains a background on mobile, never a separate block', asyn
   await expect(page.locator('#hero .hero-intro')).toBeVisible()
 })
 
-test('uploaded refrigerator video exists under the exact URL used by the hero', async ({ page }) => {
+test('compressed 4K logo video is served directly as an MP4', async ({ page }) => {
   await page.goto('/')
   const source = page.locator('#hero video source')
-  await expect(source).toHaveAttribute('src', '/NORDIX/videos/nordix-fridge.mp4')
-  const response = await page.request.head('/NORDIX/videos/nordix-fridge.mp4')
+  await expect(source).toHaveAttribute('src', '/NORDIX/videos/nordix-hero-4k.mp4')
+  const response = await page.request.head('/NORDIX/videos/nordix-hero-4k.mp4')
   expect(response.ok()).toBeTruthy()
   expect(response.headers()['content-type']).toContain('video/mp4')
-  expect(Number(response.headers()['content-length'])).toBeGreaterThan(20_000_000)
+  expect(Number(response.headers()['content-length'])).toBeGreaterThan(29_000_000)
 })
 
 test('ticker is visible at the very bottom of the opening viewport, like SYS/LAB', async ({ page }) => {

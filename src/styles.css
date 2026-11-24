@@ -803,34 +803,39 @@
 }
 
 
-/* Motion showcase: generous white space and a large rounded cinematic frame. */
+/* NORDIX learning-plan replacement: one edge-to-edge, fullscreen 16:9 movie. */
 #calculator.nordix-motion-section {
+  position: relative;
+  display: block;
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100svh;
   min-height: 100svh;
-  padding: clamp(18px, 3vw, 48px);
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
+  background: #fff;
 }
 #calculator .nordix-motion-sr-only {
   position: absolute;
-  height: 1px;
   width: 1px;
+  height: 1px;
   clip-path: inset(50%);
   overflow: hidden;
   white-space: nowrap;
 }
 #calculator .nordix-motion-frame {
-  width: min(100%, calc((100svh - 80px) * 16 / 9));
-  max-height: calc(100svh - 36px);
-  aspect-ratio: 16 / 9;
-  position: relative;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
   overflow: hidden;
-  border-radius: clamp(20px, 2.75vw, 42px);
+  border: 0;
+  border-radius: 0;
   background: #fff;
-  isolation: isolate;
 }
 #calculator .nordix-motion-player {
   display: block;
@@ -840,8 +845,8 @@
   object-position: center;
   background: #fff;
   pointer-events: none !important;
-  -webkit-user-select: none;
   user-select: none;
+  -webkit-user-select: none;
   -webkit-user-drag: none;
 }
 #hero .nordix-hero-video-player {
@@ -884,13 +889,8 @@
   border-radius: 8px;
 }
 @media (max-width: 700px) {
-  #calculator.nordix-motion-section { min-height: 100svh; padding: 18px; }
-  #calculator .nordix-motion-frame {
-    width: 100%;
-    max-height: none;
-    aspect-ratio: 16 / 9;
-    border-radius: 22px;
-  }
+  #calculator.nordix-motion-section { min-height: 100svh; height: 100svh; padding: 0; }
+  #calculator .nordix-motion-frame { width: 100%; height: 100%; border-radius: 0; }
   #faq .accordion-item .acc-icon { width: 42px; height: 42px; }
 }
 @media (prefers-reduced-motion: reduce) {
