@@ -35,19 +35,29 @@ test('course filter and course-details modal still work', async ({ page }) => {
   await expect(page.locator('#enroll-modal')).toHaveClass(/hidden/, {timeout:5000})
 })
 
-test('calculator and FAQ retain interactive behavior', async ({ page }) => {
+test('trajectory uses a full-screen passive video and FAQ arrows remain interactive', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('#hours-display')).toContainText('12')
-  await page.locator('#hours-range').evaluate((el: HTMLInputElement) => {
-    el.value = '20'
-    el.dispatchEvent(new Event('input', {bubbles:true}))
-  })
-  await expect(page.locator('#hours-display')).toContainText('20 ч / нед')
-  await page.locator('.role-btn[data-role="Компрессоры"]').click()
-  await expect(page.locator('#res-role')).toHaveText('Компрессоры')
+  const section = page.locator('#calculator')
+  const player = section.locator('.nordix-motion-player')
+  await expect(player).toHaveCount(1)
+  await expect(player).toHaveAttribute('autoplay', '')
+  await expect(player).toHaveAttribute('muted', '')
+  await expect(player).toHaveAttribute('loop', '')
+  await expect(player).not.toHaveAttribute('controls', '')
+  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-logo-motion.mp4')
+  await expect(player).toHaveCSS('pointer-events', 'none')
   const items = page.locator('#faq .accordion-item')
+  await expect(items).toHaveCount(4)
+  await expect(items.nth(0)).toHaveAttribute('aria-expanded', 'true')
+  await expect(items.nth(1).locator('.acc-arrow')).toHaveCount(1)
+  await expect(items.nth(1).locator('[data-lucide="plus"]')).toHaveCount(0)
   await items.nth(1).click()
   await expect(items.nth(1)).toHaveClass(/open/)
+  await expect(items.nth(1)).toHaveAttribute('aria-expanded', 'true')
+  await expect(items.nth(0)).not.toHaveClass(/open/)
+  await items.nth(2).focus()
+  await page.keyboard.press('Enter')
+  await expect(items.nth(2)).toHaveClass(/open/)
 })
 
 test('responsive mobile menu opens and closes', async ({ page }) => {
@@ -70,7 +80,7 @@ test('original and migrated page have the same section order', async ({ page }) 
   expect(reactLayout).toEqual(originalLayout)
 })
 
-test('fridge video is the full-screen background behind the hero headlines', async ({ page }) => {
+test('logo motion video is the full-screen background behind the hero headlines', async ({ page }) => {
   await page.setViewportSize({ width: 1792, height: 900 })
   await page.goto('/')
   const hero = page.locator('#hero')
@@ -82,7 +92,7 @@ test('fridge video is the full-screen background behind the hero headlines', asy
   await expect(player).toHaveAttribute('muted', '')
   await expect(player).toHaveAttribute('loop', '')
   await expect(player).toHaveAttribute('playsinline', '')
-  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-fridge.mp4')
+  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-logo-motion.mp4')
   const heroBox = await hero.boundingBox()
   const videoBox = await background.boundingBox()
   if (!heroBox || !videoBox) throw new Error('Hero background and page need visible dimensions')

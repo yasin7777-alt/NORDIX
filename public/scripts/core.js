@@ -140,70 +140,25 @@
 
     document.querySelectorAll('.counter').forEach(c => counterObserver.observe(c));
 
-    // Interactive Career Trajectory Calculator
-    let calcState = {
-      role: 'Холодильные системы',
-      salary: 'Холод',
-      baseMonths: 9,
-      hours: 12,
-      mult: 1
+    // The trajectory calculator was replaced by a passive looping video.\n\n    // Accessible NORDIX accordion with animated rotating arrows.
+    const faqItems = Array.from(document.querySelectorAll('#faq .accordion-item'));
+    const toggleFaq = (item) => {
+      const expand = !item.classList.contains('open');
+      faqItems.forEach((entry) => {
+        const opened = expand && entry === item;
+        entry.classList.toggle('open', opened);
+        entry.setAttribute('aria-expanded', String(opened));
+        const answer = entry.querySelector('.accordion-content');
+        if (answer) answer.setAttribute('aria-hidden', String(!opened));
+      });
     };
-
-    function updateCalculator() {
-      document.getElementById('res-role').textContent = calcState.role;
-      document.getElementById('res-salary').textContent = calcState.salary;
-      document.getElementById('hours-display').textContent = `${calcState.hours} ч / нед`;
-
-      const rawMonths = (calcState.baseMonths * (12 / calcState.hours) * calcState.mult);
-      const clampedMonths = Math.max(3, Math.min(14, rawMonths)).toFixed(1).replace('.0', '');
-      document.getElementById('res-duration').textContent = `${clampedMonths} мес.`;
-
-      const projects = Math.max(5, Math.round(calcState.baseMonths * (calcState.hours / 13)));
-      document.getElementById('res-projects').textContent = `${projects} разборов`;
-    }
-
-    document.querySelectorAll('.role-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.role-btn').forEach(b => {
-          b.classList.remove('border-accent', 'bg-n0');
-          b.classList.add('border-n500', 'bg-n200');
-        });
-        btn.classList.add('border-accent', 'bg-n0');
-        btn.classList.remove('border-n500', 'bg-n200');
-
-        calcState.role = btn.dataset.role;
-        calcState.salary = btn.dataset.salary;
-        calcState.baseMonths = parseFloat(btn.dataset.months);
-        updateCalculator();
-      });
-    });
-
-    document.getElementById('hours-range').addEventListener('input', (e) => {
-      calcState.hours = parseInt(e.target.value, 10);
-      updateCalculator();
-    });
-
-    document.querySelectorAll('.lvl-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.lvl-btn').forEach(b => {
-          b.classList.remove('bg-n900', 'text-n0');
-          b.classList.add('text-n800');
-        });
-        btn.classList.add('bg-n900', 'text-n0');
-        btn.classList.remove('text-n800');
-        calcState.mult = parseFloat(btn.dataset.mult);
-        updateCalculator();
-      });
-    });
-
-    updateCalculator();
-
-    // Accordion FAQ Logic
-    document.querySelectorAll('.accordion-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const isOpen = item.classList.contains('open');
-        document.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('open'));
-        if (!isOpen) item.classList.add('open');
+    faqItems.forEach((item) => {
+      item.addEventListener('click', () => toggleFaq(item));
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleFaq(item);
+        }
       });
     });
 
