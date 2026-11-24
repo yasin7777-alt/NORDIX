@@ -36,7 +36,7 @@ function Ticker() { return <LegacyMarkup html={ticker} /> }
 function Programs() { return <LegacyMarkup html={programs} /> }
 function Methodology() { return <LegacyMarkup html={methodology} /> }
 function LearningPlan() {
-  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-logo-motion.mp4'
+  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-wordmark-1080.mp4'
   return <LegacyMarkup html={learningPlan.replace('__NORDIX_MOTION_VIDEO__', videoUrl)} />
 }
 function Faq() { return <LegacyMarkup html={faq} /> }
