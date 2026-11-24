@@ -86,7 +86,7 @@ test('original and migrated page have the same section order', async ({ page }) 
   expect(reactLayout).toEqual(originalLayout)
 })
 
-test('compressed 4K logo video fills the hero background', async ({ page }) => {
+test('fridge video fills the homepage behind its headline', async ({ page }) => {
   await page.setViewportSize({ width: 1792, height: 900 })
   await page.goto('/')
   const hero = page.locator('#hero')
@@ -98,7 +98,7 @@ test('compressed 4K logo video fills the hero background', async ({ page }) => {
   await expect(player).toHaveAttribute('muted', '')
   await expect(player).toHaveAttribute('loop', '')
   await expect(player).toHaveAttribute('playsinline', '')
-  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-wordmark-1080.mp4')
+  await expect(player.locator('source')).toHaveAttribute('src', '/NORDIX/videos/nordix-fridge.mp4')
   const heroBox = await hero.boundingBox()
   const videoBox = await background.boundingBox()
   if (!heroBox || !videoBox) throw new Error('Hero background and page need visible dimensions')
