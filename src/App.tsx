@@ -28,6 +28,17 @@ function Cursor() { return <LegacyMarkup html={cursor} /> }
 function Header() { return <LegacyMarkup html={header} /> }
 function MobileMenu() { return <LegacyMarkup html={mobileMenu} /> }
 function Hero() {
+  useEffect(() => {
+    const video = document.querySelector<HTMLVideoElement>('#hero .nordix-hero-video-player')
+    if (!video) return
+    const setSpeed = () => {
+      video.defaultPlaybackRate = 1.43
+      video.playbackRate = 1.43
+    }
+    setSpeed()
+    video.addEventListener('loadedmetadata', setSpeed)
+    return () => video.removeEventListener('loadedmetadata', setSpeed)
+  }, [])
   // Respect the Vite base path when hosted under /NORDIX/ on GitHub Pages.
   const videoUrl = import.meta.env.BASE_URL + 'videos/output%20(1).mp4'
   return <LegacyMarkup html={hero.replace('__NORDIX_FRIDGE_VIDEO__', videoUrl)} />
