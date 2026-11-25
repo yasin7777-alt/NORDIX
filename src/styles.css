@@ -850,7 +850,7 @@
   -webkit-user-drag: none;
 }
 #hero .nordix-hero-video-player {
-  opacity: .32; /* Keep the headline legible when the clip switches to black. */
+  opacity: 1; /* Display the background video in its original colors. */
 }
 #faq .accordion-item .acc-icon {
   width: 48px;
