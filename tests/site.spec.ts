@@ -253,7 +253,7 @@ test('hero has only the primary CTA, placed to the right of its description on d
   await expect(hero.getByText('Что будем изучать')).toHaveCount(0)
   await expect(hero.locator('button')).toHaveCount(0)
   await expect(cta).toHaveCount(1)
-  await expect(cta).toContainText('Выбрать модуль')
+  await expect(cta).toContainText('Выбрать курс')
   await expect(cta).toHaveAttribute('href', '#directions')
   const [descBox, ctaBox, tickerBox] = await Promise.all([
     description.boundingBox(), cta.boundingBox(), page.locator('#hero-marquee').boundingBox(),
