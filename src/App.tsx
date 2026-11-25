@@ -29,7 +29,7 @@ function Header() { return <LegacyMarkup html={header} /> }
 function MobileMenu() { return <LegacyMarkup html={mobileMenu} /> }
 function Hero() {
   // Respect the Vite base path when hosted under /NORDIX/ on GitHub Pages.
-  const videoUrl = import.meta.env.BASE_URL + 'videos/nordix-fridge.mp4'
+  const videoUrl = import.meta.env.BASE_URL + 'videos/output%20(1).mp4'
   return <LegacyMarkup html={hero.replace('__NORDIX_FRIDGE_VIDEO__', videoUrl)} />
 }
 function Ticker() { return <LegacyMarkup html={ticker} /> }
