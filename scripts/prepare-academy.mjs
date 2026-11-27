@@ -54,9 +54,9 @@ reviseAcademy(work)
 // Insert independent, interactive component models in the theory of lessons 4, 5, 6 and 8.
 const theoryPath = join(work,'src','components','lesson','TheoryStage.tsx')
 const theory = readFileSync(theoryPath,'utf8')
-const figureEnd = '</figure>'
-if (!theory.includes(figureEnd)) throw new Error('Theory illustration anchor missing')
-writeFileSync(theoryPath, "import { LessonPartModel } from './LessonPartModel';\n" + theory.replace(figureEnd, figureEnd+'\n      <LessonPartModel lessonId={lesson.id} />'))
+const figurePattern = /<figure\b[\s\S]*?<\/figure>/
+if (!figurePattern.test(theory)) throw new Error('Theory illustration anchor missing')
+writeFileSync(theoryPath, "import { LessonPartModel } from './LessonPartModel';\n" + theory.replace(figurePattern, figure => '<>'+figure+'\n      <LessonPartModel lessonId={lesson.id} /></>'))
 cpSync(join(root,'scripts','academy','LessonPartModel.tsx'),join(work,'src','components','lesson','LessonPartModel.tsx'))
 reviseLessonNavigation(work)
 cpSync(fridgeModel, join(work, 'src', 'components', 'lab', 'FridgeModel.tsx'))
