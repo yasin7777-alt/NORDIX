@@ -46,6 +46,10 @@ for (const file of ['Header.tsx','academy-navigation.css']) {
   cpSync(join(root,'scripts','academy',file),join(work,'src','components',file))
 }
 // Match the copyright typography and left alignment of the NORDIX closing screen.
+const academyIndex = join(work,'index.html')
+const academyHtml = readFileSync(academyIndex,'utf8')
+if (!academyHtml.includes('</head>')) throw new Error('Academy head missing')
+writeFileSync(academyIndex, academyHtml.replace('</head>', '<script src="/NORDIX/scripts/route-curtain.js"></script>\n</head>'))
 const appPath = join(work, 'src', 'App.tsx')
 const app = readFileSync(appPath, 'utf8')
 const oldFooter = '<footer className="border-t border-line px-6 py-8 text-center text-sm text-fog">© 2026 NORDIX · Учебные симуляции не заменяют профессиональный допуск.</footer>'

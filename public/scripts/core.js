@@ -13,7 +13,10 @@
       coursesData[0].desc = 'От технических терминов до полного холодильного цикла: теория, видео, виртуальная практика и викторины.';
     }
     function openCourseCard(id, title) {
-      if (id === 1 && academyCourseUrl) window.location.assign(academyCourseUrl);
+      if (id === 1 && academyCourseUrl) {
+        if (typeof window.nordixNavigate === 'function') window.nordixNavigate(academyCourseUrl);
+        else window.location.assign(academyCourseUrl);
+      }
       else openEnrollModal('Модуль: ' + title);
     }
 

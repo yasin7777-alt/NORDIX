@@ -671,3 +671,23 @@ test('NORDIX intro supports sound, click to skip, and upward curtain at video en
   await expect(overlay).toHaveCount(0)
   await expect(page.locator('#hero')).toBeVisible()
 })
+
+
+test('NORDIX course and Lab transitions share a left-to-right branded curtain', async ({page})=>{
+  await page.goto('/')
+  const curtain=page.getByTestId('nordix-route-curtain')
+  await page.locator('#hero a[href="#directions"]').click()
+  await expect(curtain).toHaveAttribute('data-phase','entering')
+  await expect(curtain).toHaveCSS('background-image',/nordix-transition\.webp/)
+  await expect(curtain).toHaveCount(0)
+  const grid=page.locator('#courses-grid')
+  if (!(await grid.getAttribute('data-academy-url'))) return
+  await grid.locator('.course-card').first().getByRole('button',{name:'Начать обучение'}).click()
+  await expect(page).toHaveURL(/academy\/#\/learn\/course-1\/c1-l1$/)
+  await expect(curtain).toHaveCount(0)
+  await page.getByRole('navigation',{name:'Учебная навигация'}).getByRole('link',{name:'Лаборатория',exact:true}).click()
+  await expect(curtain).toHaveAttribute('data-phase','entering')
+  await expect(page).toHaveURL(/academy\/#\/lab$/)
+  await expect(curtain).toHaveCount(0)
+  await expect(page.getByRole('heading',{name:'NORDIX LAB',exact:true})).toBeVisible()
+})
