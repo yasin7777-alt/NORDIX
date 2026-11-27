@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { Maximize, Minimize } from 'lucide-react';
 
 const PARTS = [
   { id:'evaporator', label:'Испаритель', role:'Холодная сторона контура: хладагент поглощает тепло внутри камеры и испаряется.', facts:['На модели расположен в верхней части камеры.','Забирает тепло у продуктов и воздуха.','Форма испарителя зависит от конструкции холодильника.'] },
@@ -24,6 +26,37 @@ export function FridgeModel(){
   const [cutaway,setCutaway]=useState(false);
   const [available,setAvailable]=useState(true);
   const host=useRef<HTMLDivElement>(null);
+  const viewer=useRef<HTMLDivElement>(null);
+  const nativeFullscreen=useRef(false);
+  const [expanded,setExpanded]=useState(false);
+  const [labels,setLabels]=useState(true);
+  const closeFullscreen=()=>{
+    setExpanded(false);
+    if(document.fullscreenElement===viewer.current)void document.exitFullscreen().catch(()=>{});
+  };
+  const toggleFullscreen=()=>{
+    if(expanded){closeFullscreen();return;}
+    const element=viewer.current;
+    if(!element)return;
+    setExpanded(true);
+    if(element.requestFullscreen)void element.requestFullscreen().then(()=>{nativeFullscreen.current=document.fullscreenElement===element;}).catch(()=>{});
+  };
+  useEffect(()=>{
+    const onChange=()=>{
+      if(document.fullscreenElement===viewer.current){nativeFullscreen.current=true;setExpanded(true);}
+      else if(nativeFullscreen.current){nativeFullscreen.current=false;setExpanded(false);}
+    };
+    document.addEventListener('fullscreenchange',onChange);
+    return ()=>document.removeEventListener('fullscreenchange',onChange);
+  },[]);
+  useEffect(()=>{
+    if(!expanded)return;
+    const previous=document.body.style.overflow;
+    document.body.style.overflow='hidden';
+    const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape'){setExpanded(false);if(document.fullscreenElement===viewer.current)void document.exitFullscreen().catch(()=>{});}};
+    document.addEventListener('keydown',onKey);
+    return ()=>{document.body.style.overflow=previous;document.removeEventListener('keydown',onKey);};
+  },[expanded]);
   const markerRefs=useRef<Partial<Record<PartId,HTMLButtonElement|null>>>({});
   const lineRefs=useRef<Partial<Record<PartId,SVGLineElement|null>>>({});
   const dotRefs=useRef<Partial<Record<PartId,SVGCircleElement|null>>>({});
@@ -46,6 +79,11 @@ export function FridgeModel(){
     renderer.domElement.setAttribute('aria-label','Вращаемая трёхмерная модель холодильника');
     el.prepend(renderer.domElement);
     const scene=new THREE.Scene();
+    const environment=new RoomEnvironment();
+    const pmrem=new THREE.PMREMGenerator(renderer);
+    const reflection=pmrem.fromScene(environment,.045);
+    scene.environment=reflection.texture;scene.environmentIntensity=.65;
+    environment.dispose();pmrem.dispose();
     const camera=new THREE.PerspectiveCamera(36,1,.1,50);
     const controls=new OrbitControls(camera,renderer.domElement);
     controls.target.set(0,1.78,0);
@@ -68,7 +106,14 @@ export function FridgeModel(){
     const selectableMaterials=new Map<PartId,Set<THREE.MeshStandardMaterial>>();
     for(const p of PARTS){const g=new THREE.Group();g.name=p.id;groups.set(p.id,g);scene.add(g);selectableMaterials.set(p.id,new Set());}
     const mat=(color:number,metalness=0,roughness=.45)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
-    const enamel=mat(0xecebe4,.10,.32), inner=mat(0xe5e6e2,.06,.43), dark=mat(0x202326,.42,.34), copper=mat(0xa87343,.5,.38);
+    const enamel=mat(0xe7e7e2,.18,.30), inner=mat(0xe5e6e2,.06,.43), dark=mat(0x202326,.52,.30), copper=mat(0xa87343,.72,.34);
+    // Procedural finish: restrained surface variation, not a photograph.
+    const textureCanvas=document.createElement('canvas');textureCanvas.width=512;textureCanvas.height=512;
+    const ctx=textureCanvas.getContext('2d')!;
+    ctx.fillStyle='#e7e7e2';ctx.fillRect(0,0,512,512);
+    let seed=173;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    for(let i=0;i<13000;i++){const shade=170+Math.floor(random()*75);ctx.fillStyle='rgba('+shade+','+shade+','+shade+',0.09)';ctx.fillRect(random()*512,random()*512,1+random()*2,1);}
+    const enamelTexture=new THREE.CanvasTexture(textureCanvas);enamelTexture.colorSpace=THREE.SRGBColorSpace;enamel.map=enamelTexture;enamel.color.setHex(0xffffff);
     const steel=mat(0x8998a5,.65,.35), rubber=mat(0x30363c,0,.85);
     const panel=mat(0xe9edf0,.1,.42);
     panel.transparent=true;panel.opacity=1;panel.depthWrite=true;panel.side=THREE.DoubleSide;
@@ -118,6 +163,24 @@ export function FridgeModel(){
     }
     const rearCover=rounded(1.43,.80,.095,0,2.99,-.755,blackPanel,.075);
     const rearCoverTrim=rounded(1.51,.89,.055,0,2.99,-.735,trim,.075);
+    const rearCoverInset=rounded(1.28,.64,.060,0,2.99,-.815,mat(0x292a2c,.38,.28),.065);
+    const rearCoverDetails:THREE.Object3D[]=[rearCover,rearCoverTrim,rearCoverInset];
+    // Stamped perimeter and recessed fasteners, visible in the reference.
+    const screwMat=mat(0x969896,.65,.35);
+    for(const x of [-.64,0,.64])for(const y of [2.63,3.35]){
+      rearCoverDetails.push(cylinder(.019,.012,V(x,y,-.81),V(x,y,-.822),screwMat));
+      rearCoverDetails.push(box(.024,.004,.004,x,y,-.83,blackPanel));
+    }
+    for(const x of [-.70,.70]){
+      rearCoverDetails.push(cylinder(.019,.012,V(x,2.99,-.81),V(x,2.99,-.822),screwMat));
+    }
+    // Narrow cabinet edge seams and lower machine-compartment sheet metal.
+    for(const x of [-.76,.76]){
+      box(.014,2.69,.014,x,1.99,-.749,trim);
+      rounded(.18,.44,.09,x,.30,-.67,backMetal,.025);
+      for(const y of [.20,.48])cylinder(.022,.014,V(x,y,-.724),V(x,y,-.738),steel);
+    }
+    rounded(1.45,.095,.23,0,.13,-.54,backMetal,.016);
     for(const x of [-.65,.65])for(const y of [2.65,3.34])
       cylinder(.025,.025,V(x,y,-.805),V(x,y,-.830),steel);
     rounded(.33,.13,.014,0,3.43,-.75,mat(0x927c46,.40,.5),.012);
@@ -143,7 +206,14 @@ export function FridgeModel(){
     const gasket=rounded(1.62,2.87,.04,0,2.06,.65,rubber,.02);
     const doorHandle=rounded(.42,.10,.095,-.43,2.36,.89,steel,.04);
     const frontBadge=rounded(.38,.045,.025,0,3.14,.87,mat(0x9a8652,.6,.35),.013);
-    const doorParts=[door,gasket,doorHandle,frontBadge];
+    const handleMounts=[-.58,-.29].map(x=>rounded(.095,.13,.10,x,2.36,.86,steel,.025));
+    const doorParts=[door,gasket,doorHandle,frontBadge,...handleMounts];
+    // Subtle pressed trim on the front and two cabinet hinges.
+    doorParts.push(rounded(1.54,.018,.018,0,2.80,.862,trim,.008));
+    for(const y of [1.0,3.08]){
+      rounded(.075,.22,.12,.845,y,.65,steel,.026);
+      cylinder(.032,.18,V(.855,y-.09,.73),V(.855,y+.09,.73),steel);
+    }
         // Upper internal evaporator: plate and visible teaching representation of tube.
     const evapMat=mat(0x9cb8c6,.65,.32);
     rounded(1.46,.09,1.13,0,2.71,-.02,evapMat,.035,'evaporator');
@@ -151,24 +221,41 @@ export function FridgeModel(){
     const evapPoints=snake(-.56,.56,2.78,3.28,-.48,5);
     tube(evapPoints,.026,mat(0x6088b5,.64,.28),'evaporator');
     // Compressor shell, mounting feet and electrical cover (visual only).
-    ellipsoid(-.40,.32,-.37,.39,.29,.33,dark,'compressor');
-    box(.79,.07,.65,-.40,.13,-.37,dark,'compressor');
-    const seam=mesh(new THREE.TorusGeometry(.36,.015,10,48),steel,V(-.40,.30,-.37),'compressor');
+    // Black welded metal shell, feet, isolation mounts and terminal cover.
+    const profile=[V(0,-.27,0),V(.23,-.27,0),V(.33,-.22,0),V(.37,-.10,0),V(.38,.03,0),V(.36,.13,0),V(.29,.23,0),V(.17,.28,0),V(0,.29,0)].map(p=>new THREE.Vector2(p.x,p.y));
+    const shell=mesh(new THREE.LatheGeometry(profile,64),dark,V(-.40,.32,-.49),'compressor');shell.scale.z=.87;
+    rounded(.79,.065,.65,-.40,.11,-.49,dark,.025,'compressor');
+    for(const x of [-.68,-.12])for(const z of [-.72,-.26]){
+      cylinder(.065,.075,V(x,.09,z),V(x,.165,z),rubber,'compressor');
+      cylinder(.029,.025,V(x,.165,z),V(x,.19,z),steel,'compressor');
+    }
+    rounded(.24,.095,.012,-.40,.40,-.816,mat(0xa5a6a3,.35,.5),.008,'compressor');
+    for(let i=0;i<3;i++)box(.17,.006,.004,-.40,.38+i*.022,-.824,mat(0x4e5152,.1,.7),'compressor');
+    const seam=mesh(new THREE.TorusGeometry(.36,.015,10,48),steel,V(-.40,.30,-.49),'compressor');
     seam.rotation.x=Math.PI/2;seam.scale.set(1,.85,1);
-    box(.19,.21,.22,-.04,.29,-.38,rubber,'compressor');
+    rounded(.19,.21,.22,-.04,.29,-.49,rubber,.03,'compressor');
+    rounded(.12,.12,.075,.055,.29,-.60,dark,.018,'compressor');
     // External wire-tube condenser.
     const condenserPoints=snake(-.65,.65,.63,2.43,-.87,10);
     const condenserMat=mat(0x26282a,.38,.42);
     tube(condenserPoints,.027,condenserMat,'condenser');
-    for(let group=0;group<7;group++)for(let wire=0;wire<7;wire++){
-      const x=-.59+group*.193+wire*.020;
-      cylinder(.0065,1.93,V(x,.53,-.91),V(x,2.46,-.91),condenserMat,'condenser');
+    for(let group=0;group<7;group++)for(let wire=0;wire<9;wire++){
+      const x=-.62+group*.194+wire*.015;
+      cylinder(.0045,1.93,V(x,.53,-.91),V(x,2.46,-.91),condenserMat,'condenser');
     }
     for(const x of [-.65,.65]){
       rounded(.075,1.97,.045,x,1.53,-.80,dark,.012,'condenser');
       for(const y of [.80,2.14])cylinder(.026,.04,V(x,y,-.835),V(x,y,-.875),steel,'condenser');
     }
     rounded(1.56,.13,.12,0,.52,-.82,dark,.022,'condenser');
+    for(const x of [-.71,.71]){
+      rounded(.15,.18,.055,x,.52,-.88,blackPanel,.014,'condenser');
+      cylinder(.027,.022,V(x,.52,-.913),V(x,.52,-.935),steel,'condenser');
+    }
+    // Visible power lead and plug are decorative, without wiring instructions.
+    const cordMat=mat(0x272a2e,0,.75);
+    tube([V(-.69,.22,-.71),V(-.93,.10,-.72),V(-1.20,.055,-.65),V(-1.46,.045,-.48)],.019,cordMat);
+    rounded(.15,.09,.12,-1.49,.055,-.45,cordMat,.025);
     // Filter-drier and simplified capillary representation.
     const f1=V(.55,.31,-.77),f2=V(.55,.59,-.77);
     cylinder(.085,.28,f1,f2,copper,'filter');
@@ -181,7 +268,7 @@ export function FridgeModel(){
     // Conceptual closed-loop connections. No service dimensions or settings.
     tube([V(-.24,.53,-.45),V(-.13,.70,-.72),V(-.76,.75,-.75),V(-.76,2.43,-.87),condenserPoints[0]],.024,copper);
     tube([condenserPoints[condenserPoints.length-1],V(-.64,.60,-.87),V(.55,.24,-.77),f1],.024,copper);
-    tube([evapPoints[0],V(-.74,3.28,-.54),V(-.74,.71,-.64),V(-.57,.54,-.38)],.031,mat(0x7d98b2,.5,.45));
+    tube([evapPoints[0],V(-.74,3.28,-.54),V(-.74,.71,-.64),V(-.57,.54,-.49)],.031,mat(0x7d98b2,.5,.45));
     // Mechanical temperature dial in the front of the cabinet.
     box(.30,.18,.29,.53,3.34,.42,inner,'thermostat');
     cylinder(.09,.075,V(.53,3.31,.55),V(.53,3.31,.625),rubber,'thermostat');
@@ -193,7 +280,7 @@ export function FridgeModel(){
       }
     };
     let isCutaway=false;
-    const toggleCutaway=(on:boolean)=>{isCutaway=on;panel.opacity=on?.13:1;panel.depthWrite=!on;rearCover.visible=!on;rearCoverTrim.visible=!on;for(const o of doorParts)o.visible=!on;};
+    const toggleCutaway=(on:boolean)=>{isCutaway=on;panel.opacity=on?.13:1;panel.depthWrite=!on;for(const o of rearCoverDetails)o.visible=!on;for(const o of doorParts)o.visible=!on;};
     controller.current={view,select,cutaway:toggleCutaway};
     select('compressor');
     const raycaster=new THREE.Raycaster();
@@ -247,26 +334,28 @@ export function FridgeModel(){
       renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointerup',pointerUp);
       const materials=new Set<THREE.Material>();
       scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);}});
-      materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();controller.current=null;
+      materials.forEach(m=>m.dispose());enamelTexture.dispose();reflection.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null;
     };
   },[]);
   useEffect(()=>controller.current?.select(selected),[selected]);
   useEffect(()=>controller.current?.cutaway(cutaway),[cutaway]);
   const changeView=(v:View)=>controller.current?.view(v);
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+    <div ref={viewer} data-testid="fridge-viewer" data-expanded={expanded} style={expanded?{position:'fixed',inset:0,zIndex:9999,background:'#f5f4f2',padding:'clamp(12px,2vw,28px)',overflow:'auto',width:'100%',height:'100%',alignItems:'start'}:undefined} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       <div className="overflow-hidden rounded-2xl border border-line bg-steel p-3 sm:p-4">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <span className="mr-auto text-xs font-extrabold uppercase tracking-widest text-accent">3D · Интерактив</span>
           <button type="button" className={buttonStyle} onClick={()=>changeView('front')} disabled={!available}>Спереди</button>
           <button type="button" className={buttonStyle} onClick={()=>changeView('back')} disabled={!available}>Сзади</button>
           <button type="button" className={buttonStyle} onClick={()=>changeView('reset')} disabled={!available}>Сброс</button>
+          <button type="button" className={buttonStyle} onClick={()=>setLabels(v=>!v)} aria-pressed={labels}>Подписи</button>
+          <button type="button" className={buttonStyle+' inline-flex items-center gap-1.5'} onClick={toggleFullscreen} aria-pressed={expanded} aria-label={expanded?'Выйти из полноэкранного режима':'На весь экран'}>{expanded?<Minimize size={16}/>:<Maximize size={16}/>}<span>{expanded?'Свернуть':'На весь экран'}</span></button>
         </div>
-        <div ref={host} data-testid="fridge-3d" className="relative isolate h-[480px] overflow-hidden rounded-xl border border-line bg-[#f5f4f2] sm:h-[560px]">
-          {available && <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[5] h-full w-full overflow-hidden">
+        <div ref={host} data-testid="fridge-3d" style={expanded?{height:'max(360px,calc(100dvh - 160px))'}:undefined} className="relative isolate h-[480px] overflow-hidden rounded-xl border border-line bg-[#f5f4f2] sm:h-[560px]">
+          {available && labels && <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[5] h-full w-full overflow-hidden">
             {PARTS.map(p=><g key={p.id}><line ref={node=>{lineRefs.current[p.id]=node;}} stroke={selected===p.id?'#3D75D8':'#656b72'} strokeWidth={selected===p.id?2:1.2}/><circle ref={node=>{dotRefs.current[p.id]=node;}} r="4" fill={selected===p.id?'#3D75D8':'#fff'} stroke="#3D75D8" strokeWidth="1.5"/></g>)}
           </svg>}
-          {available ? PARTS.map(p=><button key={p.id} type="button" ref={node=>{markerRefs.current[p.id]=node;}} onClick={()=>choosePart(p.id)} aria-label={p.label+' — точка модели'} aria-pressed={selected===p.id} title={p.label} style={{visibility:'hidden',maxWidth:'43%'}} className={'absolute z-10 rounded-lg border px-2 py-1.5 text-left text-[10px] font-extrabold leading-tight shadow-sm sm:text-xs '+(selected===p.id?'border-accent bg-accent text-white':'border-[#a9adb5] bg-white/95 text-[#22262b]')}>{p.label}</button>):<div className="grid h-full place-items-center p-8 text-center text-sm text-fog">WebGL недоступен. Выберите узел в списке справа, чтобы прочитать объяснение.</div>}
+          {available && labels ? PARTS.map(p=><button key={p.id} type="button" ref={node=>{markerRefs.current[p.id]=node;}} onClick={()=>choosePart(p.id)} aria-label={p.label+' — точка модели'} aria-pressed={selected===p.id} title={p.label} style={{visibility:'hidden',maxWidth:'43%'}} className={'absolute z-10 rounded-lg border px-2 py-1.5 text-left text-[10px] font-extrabold leading-tight shadow-sm sm:text-xs '+(selected===p.id?'border-accent bg-accent text-white':'border-[#a9adb5] bg-white/95 text-[#22262b]')}>{p.label}</button>):!available?<div className="grid h-full place-items-center p-8 text-center text-sm text-fog">WebGL недоступен. Выберите узел в списке справа, чтобы прочитать объяснение.</div>:null}
 
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
