@@ -504,4 +504,12 @@ test('Academy is an independent page and Lab follows methodology when the archiv
   await expect(page).toHaveURL(/academy\/#\/lab$/)
   await expect(page.getByRole('heading', { name: 'NORDIX LAB', exact: true })).toBeVisible()
   await expect(page.getByRole('tab', { name: 'Модель холодильника' })).toBeVisible()
+  const model = page.getByTestId('fridge-3d')
+  await expect(model).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Компрессор', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '1. Испаритель', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Испаритель', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '3. Конденсатор', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Конденсатор', exact: true })).toBeVisible()
+
 })

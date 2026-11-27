@@ -7,6 +7,7 @@ import { join } from 'node:path'
 import { reviseAcademy } from './academy-editorial.mjs'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const archive = join(root, 'academy-import.zip')
+const fridgeModel = join(root, 'scripts', 'academy', 'FridgeModel.tsx')
 const work = join(root, '.academy-build')
 const output = join(root, 'public', 'academy')
 const generated = join(root, 'src', 'generated')
@@ -18,7 +19,7 @@ if (!existsSync(archive)) {
   console.log('Academy archive not installed; existing NORDIX remains unchanged.')
   process.exit(0)
 }
-const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).update(readFileSync(join(root,'scripts','academy-editorial.mjs'))).digest('hex')
+const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).update(readFileSync(join(root,'scripts','academy-editorial.mjs'))).update(readFileSync(fridgeModel)).digest('hex')
 const stamp = join(work, 'archive.sha256')
 if (existsSync(stamp) && readFileSync(stamp, 'utf8') === hash && existsSync(join(output, 'index.html'))) {
   ready(true)
@@ -41,7 +42,9 @@ const newOrder = "{to:'/lab',label:'Лаборатория'}, {to:'/progress',la
 if (!header.includes(oldOrder) && !header.includes(newOrder)) throw new Error('Unexpected Academy navigation layout')
 writeFileSync(headerPath, header.replace(oldOrder, newOrder))
 reviseAcademy(work)
+cpSync(fridgeModel, join(work, 'src', 'components', 'lab', 'FridgeModel.tsx'))
 run('npm', ['ci', '--no-audit', '--no-fund'], work)
+run('npm', ['install', '--no-save', '--package-lock=false', '--no-audit', '--no-fund', 'three@0.180.0', '@types/three@0.180.0'], work)
 run('npm', ['run', 'test'], work)
 run('npm', ['run', 'build'], work)
 rmSync(output, { recursive: true, force: true })
