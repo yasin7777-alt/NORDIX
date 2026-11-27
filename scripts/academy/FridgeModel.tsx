@@ -15,6 +15,16 @@ const PARTS = [
 ] as const;
 type PartId = typeof PARTS[number]['id'];
 type View = 'front' | 'back' | 'reset';
+const cycleOrder:PartId[]=['compressor','condenser','filter','capillary','evaporator'];
+const processOrder:PartId[]=[...cycleOrder,'thermostat'];
+const processes:Record<PartId,{action:string;input:string;output:string;color:string;note:string}>={
+ compressor:{action:'Компрессор принимает пар с низким давлением, сжимает его и направляет к конденсатору. При сжатии давление и температура пара обычно растут.',input:'Пар низкого давления',output:'Горячий пар высокого давления',color:'#dc603c',note:'Оранжевые точки показывают движение пара после сжатия.'},
+ condenser:{action:'Горячий хладагент отдаёт тепло воздуху комнаты. В обычном цикле пар постепенно превращается в жидкость.',input:'Пар высокого давления',output:'Жидкость высокого давления',color:'#d77a33',note:'Стрелки показывают, как тепло уходит от решётки наружу.'},
+ filter:{action:'Жидкий хладагент проходит через фильтр-осушитель. Он удерживает влагу и загрязнения; это не основной этап изменения давления.',input:'Жидкий хладагент',output:'Жидкость с меньшим содержанием влаги и загрязнений',color:'#d7a040',note:'Точки проходят через корпус фильтра к капиллярной трубке.'},
+ capillary:{action:'Капиллярка создаёт сопротивление потоку. Давление снижается, часть жидкости превращается в пар, и температура насыщения становится ниже.',input:'Жидкость высокого давления',output:'Смесь жидкости и пара низкого давления',color:'#498be4',note:'Переход от тёплого к синему цвету обозначает смену области давления, а не измеренную температуру.'},
+ evaporator:{action:'В испарителе хладагент поглощает тепло камеры и кипит. Пар возвращается к компрессору. Так холодильник переносит тепло наружу.',input:'Смесь жидкости и пара',output:'Пар низкого давления',color:'#498be4',note:'Синие точки движутся к выходу; стрелки показывают приток тепла из камеры к испарителю.'},
+ thermostat:{action:'Термостат сравнивает температуру камеры с заданной. В этой учебной модели он включает охлаждение, когда камера нагревается, и выключает его после достижения нужного режима.',input:'Температура камеры',output:'Команда на охлаждение или остановку',color:'#3d75d8',note:'Пульсация регулятора и смена состояния условны. Термостат не является участком движения хладагента.'}
+};
 const V = (x:number,y:number,z:number) => new THREE.Vector3(x,y,z);
 const positions:Record<PartId,THREE.Vector3> = {
   evaporator:V(-.38,3.02,-.44), compressor:V(-.40,.30,-.60), condenser:V(.46,1.65,-.91),
@@ -23,6 +33,11 @@ const positions:Record<PartId,THREE.Vector3> = {
 const buttonStyle='rounded-full border border-line bg-white px-3 py-2 text-xs font-bold text-paper transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent';
 export function FridgeModel(){
   const [selected,setSelected]=useState<PartId>('compressor');
+  const [working,setWorking]=useState(false);
+  const [playing,setPlaying]=useState(false);
+  const [fullCycle,setFullCycle]=useState(false);
+  const [thermostatOn,setThermostatOn]=useState(true);
+  const activity=useRef({working:false,playing:false,fullCycle:false,selected:'compressor' as PartId,thermostatOn:true});
   const [cutaway,setCutaway]=useState(false);
   const [available,setAvailable]=useState(true);
   const host=useRef<HTMLDivElement>(null);
@@ -62,7 +77,50 @@ export function FridgeModel(){
   const dotRefs=useRef<Partial<Record<PartId,SVGCircleElement|null>>>({});
   const controller=useRef<{view:(v:View)=>void;select:(id:PartId)=>void;cutaway:(on:boolean)=>void;invalidate:()=>void}|null>(null);
   const part=PARTS.find(p=>p.id===selected)!;
-  const choosePart=(id:PartId)=>{setSelected(id);if(id==='evaporator'||id==='thermostat'){setCutaway(true);controller.current?.view('front');}};
+  const focusProcess=(id:PartId)=>{
+    setSelected(id);
+    const internal=id==='evaporator'||id==='thermostat';
+    setCutaway(true);
+    controller.current?.view(internal?'front':'back');
+  };
+  const choosePart=(id:PartId)=>{
+    if(working){setFullCycle(false);focusProcess(id);return;}
+    setSelected(id);if(id==='evaporator'||id==='thermostat'){setCutaway(true);controller.current?.view('front');}
+  };
+  const changeMode=(on:boolean)=>{
+    setWorking(on);setPlaying(on);setFullCycle(false);
+    if(on){setLabels(false);focusProcess('compressor');}
+    else{setLabels(true);setCutaway(false);setSelected('compressor');controller.current?.view('reset');}
+  };
+  const stepProcess=(delta:number)=>{
+    setFullCycle(false);
+    focusProcess(processOrder[(processOrder.indexOf(selected)+delta+processOrder.length)%processOrder.length]);
+  };
+  const startFullCycle=()=>{
+    setWorking(true);setFullCycle(true);setPlaying(true);setLabels(false);setCutaway(true);
+    setSelected('compressor');controller.current?.view('back');
+  };
+  useEffect(()=>{
+    activity.current={working,playing,fullCycle,selected,thermostatOn};
+    controller.current?.invalidate();
+  },[working,playing,fullCycle,selected,thermostatOn]);
+  useEffect(()=>{
+    if(!working||!playing||!fullCycle)return;
+    const timer=window.setInterval(()=>{
+      setSelected(id=>cycleOrder[(cycleOrder.indexOf(id)+1)%cycleOrder.length]);
+    },5500);
+    return()=>window.clearInterval(timer);
+  },[working,playing,fullCycle]);
+  useEffect(()=>{
+    if(working&&fullCycle){
+      setCutaway(true);controller.current?.view(selected==='evaporator'?'front':'back');
+    }
+  },[working,fullCycle,selected]);
+  useEffect(()=>{
+    if(!working||!playing||selected!=='thermostat')return;
+    const timer=window.setInterval(()=>setThermostatOn(on=>!on),3200);
+    return()=>window.clearInterval(timer);
+  },[working,playing,selected]);
 
   useEffect(()=>{
     const el=host.current;
@@ -267,13 +325,79 @@ export function FridgeModel(){
     cap.push(V(.70,1.12,-.76),V(.70,2.68,-.72),V(.64,2.78,-.48),evapPoints[evapPoints.length-1]);
     tube(cap,.014,copper,'capillary');
     // Conceptual closed-loop connections. No service dimensions or settings.
-    tube([V(-.24,.53,-.45),V(-.13,.70,-.72),V(-.76,.75,-.75),V(-.76,2.43,-.87),condenserPoints[0]],.024,copper);
-    tube([condenserPoints[condenserPoints.length-1],V(-.64,.60,-.87),V(.55,.24,-.77),f1],.024,copper);
-    tube([evapPoints[0],V(-.74,3.28,-.54),V(-.74,.71,-.64),V(-.57,.54,-.49)],.031,mat(0x7d98b2,.5,.45));
+    const discharge=[V(-.24,.53,-.45),V(-.13,.70,-.72),V(-.76,.75,-.75),V(-.76,2.43,-.87),condenserPoints[0]];
+    const liquidLine=[condenserPoints[condenserPoints.length-1],V(-.64,.60,-.87),V(.55,.24,-.77),f1];
+    const suction=[evapPoints[0],V(-.74,3.28,-.54),V(-.74,.71,-.64),V(-.57,.54,-.49)];
+    tube(discharge,.024,copper);
+    tube(liquidLine,.024,copper);
+    tube(suction,.031,mat(0x7d98b2,.5,.45));
     // Mechanical temperature dial in the front of the cabinet.
     box(.30,.18,.29,.53,3.34,.42,inner,'thermostat');
     cylinder(.09,.075,V(.53,3.31,.55),V(.53,3.31,.625),rubber,'thermostat');
     box(.022,.065,.008,.53,3.33,.666,steel,'thermostat');
+    // Conceptual flow overlays share the original geometry. They depict functions, not service parameters.
+    const flowRoot=new THREE.Group();flowRoot.visible=false;scene.add(flowRoot);
+    const curveOf=(points:THREE.Vector3[])=>{
+      const curve=new THREE.CurvePath<THREE.Vector3>();
+      for(let i=1;i<points.length;i++)if(points[i].distanceToSquared(points[i-1])>1e-9)curve.add(new THREE.LineCurve3(points[i-1],points[i]));
+      return curve;
+    };
+    const hot=new THREE.Color(0xf46d31),warm=new THREE.Color(0xeab24c),cold=new THREE.Color(0x389bff);
+    const flowPaths=[
+      {id:'compressor' as PartId,points:[...suction.slice(-1),V(-.40,.32,-.49),...discharge],from:hot,to:hot},
+      {id:'condenser' as PartId,points:condenserPoints,from:hot,to:warm},
+      {id:'filter' as PartId,points:[...liquidLine,f2],from:warm,to:warm},
+      {id:'capillary' as PartId,points:cap,from:warm,to:cold},
+      {id:'evaporator' as PartId,points:[...evapPoints.slice().reverse(),...suction.slice(1)],from:cold,to:cold}
+    ].map(p=>{
+      const curve=curveOf(p.points);
+      const lineMaterial=new THREE.MeshBasicMaterial({color:p.from,transparent:true,opacity:.75,depthTest:false,depthWrite:false});
+      const line=new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(40,p.points.length*3),.014,8,false),lineMaterial);
+      line.renderOrder=12;flowRoot.add(line);
+      const particles=Array.from({length:Math.min(22,Math.max(6,Math.ceil(curve.getLength()*3)))},()=>{
+        const m=new THREE.Mesh(new THREE.SphereGeometry(.033,12,8),new THREE.MeshBasicMaterial({color:p.from,depthTest:false,depthWrite:false}));
+        m.renderOrder=13;flowRoot.add(m);return m;
+      });
+      return {...p,curve,line,particles};
+    });
+    const heatArrows:Array<{id:PartId;origin:THREE.Vector3;dir:THREE.Vector3;arrow:THREE.ArrowHelper}>=[];
+    for(const id of ['condenser','evaporator'] as const){
+      for(let i=0;i<4;i++){
+        const origin=id==='condenser'?V(-.43+i*.28,1.03+i*.29,-.97):V(-.49+i*.30,2.45,-.15);
+        const dir=id==='condenser'?V(0,.12,-1).normalize():V(0,1,0);
+        const arrow=new THREE.ArrowHelper(dir,origin,.35,0xf48a36,.10,.075);
+        arrow.line.material.depthTest=false;arrow.cone.material.depthTest=false;
+        arrow.line.renderOrder=14;arrow.cone.renderOrder=14;flowRoot.add(arrow);heatArrows.push({id,origin,dir,arrow});
+      }
+    }
+    let phase=0,lastTime=0;
+    const animateProcess=(time:number)=>{
+      const a=activity.current;flowRoot.visible=a.working;
+      const dt=lastTime?Math.min(.08,(time-lastTime)/1000):0;lastTime=time;
+      if(a.working&&a.playing)phase+=dt;
+      for(const p of flowPaths){
+        const active=p.id===a.selected,visible=a.working&&(active||a.fullCycle);
+        p.line.visible=visible;p.line.material.opacity=active?.78:.24;
+        p.particles.forEach((m,i)=>{
+          m.visible=visible&&(active||a.fullCycle);
+          if(!m.visible)return;
+          const u=(i/p.particles.length+phase*.65/Math.max(.5,p.curve.getLength()))%1;
+          m.position.copy(p.curve.getPointAt(u));
+          m.material.color.copy(p.from).lerp(p.to,u);
+          m.scale.setScalar(active?1:.72);
+        });
+      }
+      for(const h of heatArrows){
+        h.arrow.visible=a.working&&a.selected===h.id;
+        if(h.arrow.visible)h.arrow.position.copy(h.origin).addScaledVector(h.dir,(phase*.38)% .26);
+      }
+      if(a.working&&a.selected==='thermostat'){
+        for(const m of selectableMaterials.get('thermostat')||[]){
+          m.emissive.setHex(a.thermostatOn?0x3d75d8:0x64748b);
+          m.emissiveIntensity=a.thermostatOn?.45+.25*Math.sin(phase*5):.12;
+        }
+      }
+    };
     // Soft contact shadow without a visible circular platform, as in the reference viewer.
     const shadowCanvas=document.createElement('canvas');shadowCanvas.width=256;shadowCanvas.height=256;
     const shadowCtx=shadowCanvas.getContext('2d')!;
@@ -302,7 +426,7 @@ export function FridgeModel(){
       down=null;const rect=renderer.domElement.getBoundingClientRect();
       raycaster.setFromCamera(new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1),camera);
       const hit=raycaster.intersectObjects(pickable,false)[0];
-      if(hit){const id=hit.object.userData.part as PartId;if(isCutaway||!(id==='thermostat'||id==='evaporator'))setSelected(id);}
+      if(hit){const id=hit.object.userData.part as PartId;if(isCutaway||!(id==='thermostat'||id==='evaporator')){if(activity.current.working){setFullCycle(false);setCutaway(true);view(id==='evaporator'||id==='thermostat'?'front':'back');}setSelected(id);}}
     };
     renderer.domElement.addEventListener('pointerdown',pointerDown);
     renderer.domElement.addEventListener('pointerup',pointerUp);
@@ -313,10 +437,11 @@ export function FridgeModel(){
     let disposed=false;
     // Render on demand: an idle refrigerator should consume no continuous GPU time.
     // OrbitControls change events keep the animation alive during drag and damping.
-    const render=()=>{
+    const render=(time:number)=>{
       frame=0;
       if(disposed)return;
-      controls.update();renderer.render(scene,camera);
+      controls.update();animateProcess(time);renderer.render(scene,camera);
+      if(activity.current.working&&activity.current.playing)invalidate();
       const width=el.clientWidth,height=el.clientHeight;
       const left:{id:PartId;x:number;y:number}[]=[],right:{id:PartId;x:number;y:number}[]=[];
       for(const p of PARTS){
@@ -353,6 +478,7 @@ export function FridgeModel(){
       renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointerup',pointerUp);
       const materials=new Set<THREE.Material>();
       scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);}});
+      for(const h of heatArrows){h.arrow.line.geometry.dispose();h.arrow.cone.geometry.dispose();h.arrow.line.material.dispose();h.arrow.cone.material.dispose();}
       materials.forEach(m=>m.dispose());enamelTexture.dispose();shadowTexture.dispose();reflection.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null;
     };
   },[]);
@@ -361,7 +487,12 @@ export function FridgeModel(){
   useEffect(()=>controller.current?.invalidate(),[labels,expanded,selected]);
   const changeView=(v:View)=>controller.current?.view(v);
   return (
-    <div ref={viewer} data-testid="fridge-viewer" data-expanded={expanded} style={expanded?{position:'fixed',inset:0,zIndex:9999,background:'#dedede',padding:'clamp(12px,2vw,28px)',overflow:'auto',width:'100%',height:'100%',alignItems:'start'}:undefined} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+    <div ref={viewer} data-testid="fridge-viewer" data-expanded={expanded} style={expanded?{position:'fixed',inset:0,zIndex:9999,background:'#dedede',padding:'clamp(12px,2vw,28px)',overflow:'auto',width:'100%',height:'100%',alignItems:'start'}:undefined} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]" data-working={working}>
+      <div className="flex flex-wrap items-center gap-2 lg:col-span-2" aria-label="Режим лаборатории">
+        <button type="button" aria-pressed={!working} onClick={()=>changeMode(false)} className={buttonStyle+(!working?' !bg-accent !text-white':'')}>Изучить модель</button>
+        <button type="button" data-testid="fridge-working-mode" aria-pressed={working} onClick={()=>changeMode(true)} className={buttonStyle+(working?' !bg-accent !text-white':'')}>Как работает холодильник</button>
+        {working&&<span className="text-xs text-fog">Учебная анимация · не реальные измерения</span>}
+      </div>
       <div className="overflow-hidden rounded-2xl border border-line bg-steel p-3 sm:p-4">
         <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
           <button type="button" className={buttonStyle} onClick={()=>changeView('front')} disabled={!available}>Спереди</button>
@@ -370,7 +501,7 @@ export function FridgeModel(){
           <button type="button" className={buttonStyle} onClick={()=>setLabels(v=>!v)} aria-pressed={labels}>Подписи</button>
           <button type="button" className={buttonStyle+' inline-flex items-center gap-1.5'} onClick={toggleFullscreen} aria-pressed={expanded} aria-label={expanded?'Выйти из полноэкранного режима':'На весь экран'}>{expanded?<Minimize size={16}/>:<Maximize size={16}/>}<span>{expanded?'Свернуть':'На весь экран'}</span></button>
         </div>
-        <div ref={host} data-testid="fridge-3d" style={{background:'radial-gradient(ellipse at 50% 42%, #dedede 0%, #bfc0c1 53%, #77797c 100%)',...(expanded?{height:'max(360px,calc(100dvh - 160px))'}:{})}} className="relative isolate h-[480px] overflow-hidden rounded-xl border border-line sm:h-[560px]">
+        <div ref={host} data-testid="fridge-3d" style={{background:'radial-gradient(ellipse at 50% 42%, #dedede 0%, #bfc0c1 53%, #77797c 100%)',...(expanded?{height:working?'max(300px,calc(100dvh - 230px))':'max(360px,calc(100dvh - 200px))'}:{})}} className="relative isolate h-[480px] overflow-hidden rounded-xl border border-line sm:h-[560px]">
           {available && labels && <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[5] h-full w-full overflow-hidden">
             {PARTS.map(p=><g key={p.id}><line ref={node=>{lineRefs.current[p.id]=node;}} stroke={selected===p.id?'#3D75D8':'#656b72'} strokeWidth={selected===p.id?2:1.2}/><circle ref={node=>{dotRefs.current[p.id]=node;}} r="4" fill={selected===p.id?'#3D75D8':'#fff'} stroke="#3D75D8" strokeWidth="1.5"/></g>)}
           </svg>}
@@ -384,13 +515,28 @@ export function FridgeModel(){
         <p className="mt-3 text-xs leading-relaxed text-fog">Нажмите на деталь или подпись. Для внутренних узлов включите прозрачный корпус. Модель воссоздана по видеореференсу; расположение скрытых узлов условное.</p>
       </div>
       <div className="rounded-2xl border border-line bg-coal p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-fog">Выбранный узел</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-fog">{working?'Действующая функция':'Выбранный узел'}</p>
         <div aria-live="polite">
           <h3 className="mt-1 font-display text-2xl font-bold text-paper">{part.label}</h3>
-          <p className="mt-3 leading-relaxed text-silver">{part.role}</p>
-          <ul className="mt-4 space-y-2">{part.facts.map(fact=><li key={fact} className="flex gap-3 rounded-lg border border-line bg-steel px-4 py-2.5 text-sm text-silver"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"/>{fact}</li>)}</ul>
+          <p className="mt-3 leading-relaxed text-silver" data-testid="fridge-process-description">{working?processes[selected].action:part.role}</p>
+          {working?<div className="mt-4 space-y-2">
+            <div className="rounded-xl border border-line bg-steel p-3"><p className="text-xs font-bold text-fog">На входе</p><p className="mt-1 text-sm font-bold text-paper">{processes[selected].input}</p></div>
+            <div className="rounded-xl border border-line bg-steel p-3"><p className="text-xs font-bold text-fog">На выходе</p><p className="mt-1 text-sm font-bold text-paper">{processes[selected].output}</p></div>
+            <p className="flex items-start gap-2 text-xs leading-relaxed text-fog"><span style={{background:processes[selected].color}} className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"/>{processes[selected].note}</p>
+            {selected==='thermostat'&&<p data-testid="thermostat-state" className="rounded-xl border border-line bg-steel p-3 text-sm font-bold text-paper">{thermostatOn?'Охлаждение включено':'Охлаждение остановлено'}</p>}
+          </div>:<ul className="mt-4 space-y-2">{part.facts.map(fact=><li key={fact} className="flex gap-3 rounded-lg border border-line bg-steel px-4 py-2.5 text-sm text-silver"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"/>{fact}</li>)}</ul>}
         </div>
-        <div className="mt-6 grid gap-2 sm:grid-cols-2">{PARTS.map((p,i)=><button key={p.id} type="button" aria-pressed={selected===p.id} onClick={()=>choosePart(p.id)} className={'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-bold '+(selected===p.id?'border-accent bg-accent text-white':'border-line bg-steel text-paper hover:border-accent')}><span className="opacity-80">{i+1}.</span>{p.label}</button>)}</div>
+        {working&&<div className="mt-5 space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" data-testid="fridge-play" disabled={!available} onClick={()=>setPlaying(v=>!v)} className={buttonStyle+' !bg-accent !text-white'}>{playing?'Пауза':'Пуск'}</button>
+            <button type="button" onClick={()=>stepProcess(-1)} className={buttonStyle}>← Назад</button>
+            <button type="button" onClick={()=>stepProcess(1)} className={buttonStyle}>Далее →</button>
+            <button type="button" data-testid="fridge-full-cycle" disabled={!available} aria-pressed={fullCycle} onClick={startFullCycle} className={buttonStyle+(fullCycle?' !bg-accent !text-white':'')}>Полный цикл</button>
+          </div>
+          <p className="text-xs text-fog">{fullCycle?'Полный цикл · автоматическая смена этапов': 'Этап '+(processOrder.indexOf(selected)+1)+' из '+processOrder.length}</p>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-fog"><span className="h-2 w-2 rounded-full bg-[#f46d31]"/>Горячий пар <span className="h-2 w-2 rounded-full bg-[#eab24c]"/>Жидкость высокого давления <span className="h-2 w-2 rounded-full bg-[#389bff]"/>Низкое давление</div>
+        </div>}
+        <div className="mt-6 grid gap-2 sm:grid-cols-2">{(working?processOrder.map(id=>PARTS.find(p=>p.id===id)!):PARTS).map((p,i)=><button key={p.id} type="button" aria-pressed={selected===p.id} onClick={()=>choosePart(p.id)} className={'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-bold '+(selected===p.id?'border-accent bg-accent text-white':'border-line bg-steel text-paper hover:border-accent')}><span className="opacity-80">{i+1}.</span>{p.label}</button>)}</div>
         <p className="mt-5 text-xs leading-relaxed text-fog">Модель предназначена для изучения функций узлов. Не является инструкцией по разборке или обслуживанию реального оборудования.</p>
         <a href="https://www.danfoss.com/en/about-danfoss/our-businesses/cooling/the-fridge-how-it-works" target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs font-bold text-accent underline">Принцип работы: Danfoss</a>
       </div>
