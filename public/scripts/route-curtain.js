@@ -2,7 +2,7 @@
 (() => {
   const root = new URL('../', document.currentScript.src);
   const key = 'nordix-route-curtain-v1';
-  const artwork = new URL('nordix-transition.webp', root).href;
+  const artwork = new URL('nordix-transition-v2.webp', root).href;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const preload = new Image();
   preload.src = artwork;
