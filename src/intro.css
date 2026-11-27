@@ -17,7 +17,8 @@
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   color: #fff; text-align: left; font-family: Manrope, Arial, sans-serif; cursor: pointer !important;
 }
-.nordix-intro-sound:focus-visible { outline: 2px solid #3D75D8; outline-offset: 3px; }
+.nordix-intro-sound:focus { outline: none; }
+.nordix-intro-sound:focus-visible { outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 5px 24px rgba(0,0,0,.24); }
 .nordix-intro-speaker { display:grid; place-items:center; width:30px; height:30px; border:1px solid rgba(255,255,255,.13); border-radius:50%; color:#6097ff; }
 .nordix-intro-sound-copy { display:flex; flex-direction:column; line-height:1.3; min-width:104px; }
 .nordix-intro-sound-copy > span { font-size:10px; color:rgba(255,255,255,.63); font-weight:600; }
