@@ -481,8 +481,10 @@ test('NORDIX wordmark parallax reverses with native wheel scrolling', async ({ p
 })
 
 
-test('Academy is an independent page and Lab follows trajectory when the archive is installed', async ({ page }) => {
+test('Academy is an independent page and Lab follows methodology when the archive is installed', async ({ page }) => {
   await page.goto('/')
+  await expect(page.locator('#navbar .nav-links a[href="#calculator"]')).toHaveCount(0)
+  await expect(page.locator('#mobile-menu a[href="#calculator"]')).toHaveCount(0)
   const lab = page.locator('#navbar .nav-links a').filter({ hasText: 'Лаборатория' })
   if (await lab.count() === 0) {
     await expect(page.locator('#courses-grid')).not.toHaveAttribute('data-academy-url', /.+/)
@@ -490,7 +492,7 @@ test('Academy is an independent page and Lab follows trajectory when the archive
   }
   await expect(page.locator('#navbar .nav-links a').last()).toHaveText('FAQ')
   await expect(page.locator('#navbar .nav-links a').nth(-2)).toHaveText('Лаборатория')
-  await expect(page.locator('#navbar .nav-links a').nth(-3)).toHaveText('Траектория')
+  await expect(page.locator('#navbar .nav-links a').nth(-3)).toHaveText('Методология')
   await expect(page.locator('#courses-grid .course-card').first()).toContainText('База холодильной техники')
   await page.locator('#courses-grid .course-card').first().getByRole('button', { name: 'Начать обучение' }).click()
   await expect(page).toHaveURL(/academy\/#\/learn\/course-1\/c1-l1$/)
