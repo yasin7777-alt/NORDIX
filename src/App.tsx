@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Intro } from './Intro'
 import { academyReady } from './generated/academy-ready'
 
 import cursor from './sections/Cursor.html?raw'
@@ -141,6 +142,7 @@ export function App() {
         <Closing />
       </div>
       <Modals />
+      <Intro />
     </>
   )
 }

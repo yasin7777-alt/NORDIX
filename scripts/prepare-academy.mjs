@@ -13,6 +13,8 @@ const work = join(root, '.academy-build')
 const output = join(root, 'public', 'academy')
 const generated = join(root, 'src', 'generated')
 mkdirSync(generated, { recursive: true })
+// Enable the intro only when the actual user-supplied MP4 is present.
+writeFileSync(join(generated, 'intro-ready.ts'), 'export const introReady = ' + existsSync(join(root, 'public', 'videos', 'nordix-intro.mp4')) + '\n')
 const ready = value => writeFileSync(join(generated, 'academy-ready.ts'), 'export const academyReady = ' + value + '\n')
 ready(false)
 if (!existsSync(archive)) {

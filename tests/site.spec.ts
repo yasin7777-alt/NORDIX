@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test'
 
+// Existing homepage tests exercise the site after the one-time intro.
+test.beforeEach(async ({page}, info) => {
+  if (!info.title.startsWith('NORDIX intro')) await page.addInitScript(() => sessionStorage.setItem('nordix-intro-seen-v1','1'))
+})
+
 test('original page sections, six modules and primary navigation still exist', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('#hero')).toHaveCount(1)
@@ -628,4 +633,30 @@ test('Academy component lessons provide separate interactive 3D viewers', async 
   await expect(viewer).toHaveAttribute('data-kind','capillary')
   await expect(viewer.locator('canvas')).toBeVisible()
   await checkFullscreen()
+})
+
+
+test('NORDIX intro supports sound, click to skip, and upward curtain at video end', async ({page}) => {
+  await page.goto('/')
+  const overlay=page.getByTestId('nordix-intro')
+  if (!(await overlay.count())) { test.skip(true, 'Intro MP4 not yet installed'); return }
+  const player=overlay.locator('video')
+  await expect(player).toHaveAttribute('src','/NORDIX/videos/nordix-intro.mp4')
+  await expect.poll(()=>player.evaluate((v:HTMLVideoElement)=>v.readyState)).toBeGreaterThan(0)
+  await expect(page.getByTestId('intro-sound')).toHaveAttribute('aria-pressed','false')
+  await page.getByTestId('intro-sound').click()
+  await expect(page.getByTestId('intro-sound')).toHaveAttribute('aria-pressed','true')
+  await expect(overlay).toBeVisible()
+  await overlay.getByRole('button',{name:'Пропустить вступление'}).click({position:{x:400,y:250}})
+  await expect(overlay).toHaveAttribute('data-phase','closing')
+  await expect(overlay).toHaveCount(0)
+  await page.reload()
+  await expect(overlay).toHaveCount(0)
+  await page.evaluate(()=>sessionStorage.removeItem('nordix-intro-seen-v1'))
+  await page.reload()
+  await expect(overlay).toBeVisible()
+  await player.dispatchEvent('ended')
+  await expect(overlay).toHaveAttribute('data-phase','closing')
+  await expect(overlay).toHaveCount(0)
+  await expect(page.locator('#hero')).toBeVisible()
 })
