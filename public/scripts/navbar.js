@@ -2,7 +2,7 @@
 (() => {
  const header=document.getElementById('navbar');
  const links=Array.from(header.querySelectorAll('.nav-links a'));
- const sections=links.map(link=>document.querySelector(link.getAttribute('href')));
+ const sections=links.map(link=>{const href=link.getAttribute('href');return href?.startsWith('#') ? document.querySelector(href) : null;});
  let queued=false;
  function updateNavigation(){
   queued=false;

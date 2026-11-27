@@ -479,3 +479,23 @@ test('NORDIX wordmark parallax reverses with native wheel scrolling', async ({ p
   await expect.poll(shift).toBeGreaterThan(4)
   expect(await page.evaluate(() => document.documentElement.classList.contains('nordix-final-scroll-active'))).toBe(false)
 })
+
+
+test('Academy is an independent page and Lab follows FAQ when the archive is installed', async ({ page }) => {
+  await page.goto('/')
+  const lab = page.locator('#navbar .nav-links a').filter({ hasText: 'Лаборатория' })
+  if (await lab.count() === 0) {
+    await expect(page.locator('#courses-grid')).not.toHaveAttribute('data-academy-url', /.+/)
+    return
+  }
+  await expect(page.locator('#navbar .nav-links a').last()).toHaveText('Лаборатория')
+  await expect(page.locator('#navbar .nav-links a').nth(-2)).toHaveText('FAQ')
+  await expect(page.locator('#courses-grid .course-card').first()).toContainText('База холодильной техники')
+  await page.locator('#courses-grid .course-card').first().getByRole('button', { name: 'Начать обучение' }).click()
+  await expect(page).toHaveURL(/academy\/#\/learn\/course-1\/c1-l1$/)
+  await expect(page.getByRole('heading', { name: 'Основные технические термины', exact: true })).toBeVisible()
+  await page.getByRole('link', { name: 'Лаборатория', exact: true }).click()
+  await expect(page).toHaveURL(/academy\/#\/lab$/)
+  await expect(page.getByRole('heading', { name: 'NORDIX LAB', exact: true })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Модель холодильника' })).toBeVisible()
+})

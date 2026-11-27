@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { academyReady } from './generated/academy-ready'
 
 import cursor from './sections/Cursor.html?raw'
 import header from './sections/Header.html?raw'
@@ -25,8 +26,9 @@ function LegacyMarkup({ html }: { html: string }) {
 }
 
 function Cursor() { return <LegacyMarkup html={cursor} /> }
-function Header() { return <LegacyMarkup html={header} /> }
-function MobileMenu() { return <LegacyMarkup html={mobileMenu} /> }
+const academyUrl = import.meta.env.BASE_URL + 'academy/'
+function Header() { return <LegacyMarkup html={header.replace('<!-- ACADEMY_LAB_LINK -->', academyReady ? '<a href="' + academyUrl + '#/lab" class="text-base font-bold text-n800 hover:text-accent transition-colors">Лаборатория</a>' : '')} /> }
+function MobileMenu() { return <LegacyMarkup html={mobileMenu.replace('<!-- ACADEMY_LAB_LINK -->', academyReady ? '<a href="' + academyUrl + '#/lab" class="mobile-link font-display text-4xl font-bold hover:text-semantic transition-colors">05 / Лаборатория</a>' : '')} /> }
 function Hero() {
   useEffect(() => {
     const video = document.querySelector<HTMLVideoElement>('#hero .nordix-hero-video-player')
@@ -44,7 +46,7 @@ function Hero() {
   return <LegacyMarkup html={hero.replace('__NORDIX_FRIDGE_VIDEO__', videoUrl)} />
 }
 function Ticker() { return <LegacyMarkup html={ticker} /> }
-function Programs() { return <LegacyMarkup html={programs} /> }
+function Programs() { return <LegacyMarkup html={academyReady ? programs.replace('id="courses-grid"', 'id="courses-grid" data-academy-url="' + academyUrl + '#/learn/course-1/c1-l1"') : programs} /> }
 function Methodology() { return <LegacyMarkup html={methodology} /> }
 function LearningPlan() {
   const videoUrl = import.meta.env.BASE_URL + 'videos/NORDIX_sharp_1440p.mp4'

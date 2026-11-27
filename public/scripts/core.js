@@ -6,6 +6,16 @@
     const coursesData = [{"id": 1, "category": "ai", "tag": "ХОЛОД", "duration": "Учебный модуль", "level": "Базовый", "title": "Основы холодильного цикла", "desc": "Компрессор, конденсатор, дросселирующее устройство и испаритель. Разбираем, куда уходит тепло и почему в камере становится холодно.", "dark": true}, {"id": 2, "category": "ai", "tag": "КОМПРЕССОРЫ", "duration": "Учебный модуль", "level": "Базовый", "title": "Компрессоры и агрегаты", "desc": "Назначение, основные узлы и рабочие параметры. Учимся понимать агрегат, а не просто слушать, как он гудит.", "dark": false}, {"id": 3, "category": "dev", "tag": "ЭЛЕКТРИКА", "duration": "Учебный модуль", "level": "Базовый", "title": "Электросхемы и электропривод", "desc": "Электродвигатели, контакторы, реле и цепи управления. Читаем схему и разбираемся, кто за что отвечает.", "dark": false}, {"id": 4, "category": "dev", "tag": "АВТОМАТИКА", "duration": "Учебный модуль", "level": "Базовый", "title": "Управление и защита", "desc": "Датчики температуры и давления, контроллеры и защитные устройства. Разбираем логику работы — без обхода защит.", "dark": false}, {"id": 5, "category": "design", "tag": "МОНТАЖ", "duration": "Учебный модуль", "level": "Базовый", "title": "Монтаж оборудования", "desc": "Крепления, трубопроводы, соединения и организация рабочего места. Собираем понимание процесса: аккуратно, по документации, без «и так сойдёт».", "dark": false}, {"id": 6, "category": "design", "tag": "ДИАГНОСТИКА", "duration": "Учебный модуль", "level": "Базовый", "title": "Обслуживание и поиск неисправностей", "desc": "Учебные разборы: камера не держит холод, агрегат шумит, срабатывает защита. Ищем причину по признакам, а не меняем всё подряд.", "dark": false}];
 
     const coursesGrid = document.getElementById('courses-grid');
+    const academyCourseUrl = coursesGrid.dataset.academyUrl;
+    if (academyCourseUrl) {
+      coursesData[0].title = 'База холодильной техники';
+      coursesData[0].duration = '10 уроков';
+      coursesData[0].desc = 'От технических терминов до полного холодильного цикла: теория, видео, виртуальная практика и викторины.';
+    }
+    function openCourseCard(id, title) {
+      if (id === 1 && academyCourseUrl) window.location.assign(academyCourseUrl);
+      else openEnrollModal('Модуль: ' + title);
+    }
 
     function renderCourses(filter = 'all') {
       coursesGrid.style.opacity = '0';
@@ -39,13 +49,13 @@
             </div>
 
             <div class="mt-10 pt-6 border-t ${c.dark ? 'border-n800' : 'border-n400'} flex items-center justify-between">
-              <button onclick="openEnrollModal('Модуль: ${c.title}')" class="font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 ${
+              <button onclick="openCourseCard(${c.id}, '${c.title}')" class="font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 ${
                 c.dark ? 'text-semantic hover:text-n0' : 'text-n900 hover:text-accent'
               } transition-colors">
-                <span>Программа курса</span>
+                <span>${c.id === 1 && academyCourseUrl ? 'Начать обучение' : 'Программа курса'}</span>
                 <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
               </button>
-              <button onclick="openEnrollModal('Модуль: ${c.title}')" aria-label="Записаться" class="w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+              <button onclick="openCourseCard(${c.id}, '${c.title}')" aria-label="${c.id === 1 && academyCourseUrl ? 'Начать курс' : 'Записаться'}" class="w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                 c.dark ? 'bg-n800 hover:bg-accent text-n0' : 'bg-n300 hover:bg-accent hover:text-n0 text-n900'
               }">
                 <i data-lucide="plus" class="w-5 h-5"></i>
