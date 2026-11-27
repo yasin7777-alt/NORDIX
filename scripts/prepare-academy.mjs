@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { reviseAcademy } from './academy-editorial.mjs'
+import { reviseLessonNavigation } from './academy/lesson-navigation.mjs'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const archive = join(root, 'academy-import.zip')
 const fridgeModel = join(root, 'scripts', 'academy', 'FridgeModel.tsx')
@@ -19,7 +20,7 @@ if (!existsSync(archive)) {
   console.log('Academy archive not installed; existing NORDIX remains unchanged.')
   process.exit(0)
 }
-const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).update(readFileSync(join(root,'scripts','academy-editorial.mjs'))).update(readFileSync(fridgeModel)).update(readFileSync(join(root,'scripts','academy','Header.tsx'))).update(readFileSync(join(root,'scripts','academy','academy-navigation.css'))).update(readFileSync(join(root,'scripts','academy','academy-wordmark.png'))).update(readFileSync(join(root,'scripts','academy','lab-wordmark.png'))).digest('hex')
+const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).update(readFileSync(join(root,'scripts','academy-editorial.mjs'))).update(readFileSync(fridgeModel)).update(readFileSync(join(root,'scripts','academy','lesson-navigation.mjs'))).update(readFileSync(join(root,'scripts','academy','Header.tsx'))).update(readFileSync(join(root,'scripts','academy','academy-navigation.css'))).update(readFileSync(join(root,'scripts','academy','academy-wordmark.png'))).update(readFileSync(join(root,'scripts','academy','lab-wordmark.png'))).digest('hex')
 const stamp = join(work, 'archive.sha256')
 if (existsSync(stamp) && readFileSync(stamp, 'utf8') === hash && existsSync(join(output, 'index.html'))) {
   ready(true)
@@ -50,6 +51,7 @@ const newFooter = '<footer className="border-t border-line" style={{padding:"24p
 if (!app.includes(oldFooter)) throw new Error('Unexpected Academy footer layout')
 writeFileSync(appPath, app.replace(oldFooter, newFooter))
 reviseAcademy(work)
+reviseLessonNavigation(work)
 cpSync(fridgeModel, join(work, 'src', 'components', 'lab', 'FridgeModel.tsx'))
 run('npm', ['ci', '--no-audit', '--no-fund'], work)
 run('npm', ['install', '--no-save', '--package-lock=false', '--no-audit', '--no-fund', 'three@0.180.0', '@types/three@0.180.0'], work)

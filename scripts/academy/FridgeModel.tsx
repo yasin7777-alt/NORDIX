@@ -363,8 +363,7 @@ export function FridgeModel(){
   return (
     <div ref={viewer} data-testid="fridge-viewer" data-expanded={expanded} style={expanded?{position:'fixed',inset:0,zIndex:9999,background:'#dedede',padding:'clamp(12px,2vw,28px)',overflow:'auto',width:'100%',height:'100%',alignItems:'start'}:undefined} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       <div className="overflow-hidden rounded-2xl border border-line bg-steel p-3 sm:p-4">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="mr-auto text-xs font-extrabold uppercase tracking-widest text-accent">3D · Интерактив</span>
+        <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
           <button type="button" className={buttonStyle} onClick={()=>changeView('front')} disabled={!available}>Спереди</button>
           <button type="button" className={buttonStyle} onClick={()=>changeView('back')} disabled={!available}>Сзади</button>
           <button type="button" className={buttonStyle} onClick={()=>changeView('reset')} disabled={!available}>Сброс</button>
