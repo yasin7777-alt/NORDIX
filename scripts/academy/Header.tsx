@@ -38,7 +38,8 @@ export function Header() {
       <a href={base} aria-label="NORDIX — главная" className="academy-nav-brand">
         <span className="academy-brand-lockup inline-flex items-center select-none">
           <span className="academy-brand-tile flex h-10 w-14 shrink-0 items-center justify-center rounded-xl bg-black">
-            <img src={base+'favicon.svg'} className="h-8 w-10 object-contain" alt=""/>
+            <img src={base+'favicon.svg'} className="academy-brand-full h-8 w-10 object-contain" alt=""/>
+            <img data-testid="academy-compact-logo" src="https://www.designarena.ai/u/7aac2bcc-cf37-4e59-97c7-bbe3985cf939" className="academy-brand-compact" alt="" onError={event=>{const img=event.currentTarget;const fallback=base+'favicon.svg';if(img.getAttribute('src')!==fallback){img.src=fallback;img.style.height='48px';}}}/>
           </span>
           <span className="academy-brand-name">
             <img data-testid="section-wordmark" src={isLab?labWordmark:academyWordmark} alt={isLab?'LAB':'Academy'} style={{height:28,width:'auto',maxWidth:'min(150px,45vw)',objectFit:'contain'}}/>

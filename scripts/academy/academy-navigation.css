@@ -42,7 +42,10 @@
 .academy-navbar.is-compact::before { left: 18px; right: 18px; height: 55%; border-radius: 999px; opacity: .58; background: linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,255,255,.15) 68%, transparent); }
 .academy-navbar.is-compact .academy-nav-shell { height: 64px; padding-inline: 22px; }
 .academy-navbar.is-compact .academy-brand-lockup { gap: 0; }
-.academy-navbar.is-compact .academy-brand-tile { transform: scale(.9); }
+.academy-navbar .academy-brand-compact { display: none; }
+.academy-navbar.is-compact .academy-brand-tile { width: 48px; height: 40px; padding: 0; border-radius: 0; background: transparent; transform: none; }
+.academy-navbar.is-compact .academy-brand-full { display: none; }
+.academy-navbar.is-compact .academy-brand-compact { display: block; width: 48px; height: 32px; object-fit: contain; filter: invert(1); mix-blend-mode: multiply; }
 .academy-navbar.is-compact .academy-brand-name { max-width: 0; opacity: 0; transform: translateX(-20px); }
 .academy-navbar.is-compact .academy-nav-links {
   gap: 2px; background: linear-gradient(180deg, rgba(255,255,255,.40), rgba(235,242,248,.22));
