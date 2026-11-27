@@ -499,6 +499,7 @@ test('Academy is an independent page and Lab follows methodology when the archiv
   await page.locator('#courses-grid .course-card').first().getByRole('button', { name: 'Начать обучение' }).click()
   await expect(page).toHaveURL(/academy\/#\/learn\/course-1\/c1-l1$/)
   await expect(page.getByRole('heading', { name: 'Основные технические термины', exact: true })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Учебная навигация' }).getByRole('link')).toHaveText(['Все курсы', 'Курс', 'Лаборатория', 'Мой прогресс'])
   await page.getByRole('link', { name: 'Лаборатория', exact: true }).click()
   await expect(page).toHaveURL(/academy\/#\/lab$/)
   await expect(page.getByRole('heading', { name: 'NORDIX LAB', exact: true })).toBeVisible()
