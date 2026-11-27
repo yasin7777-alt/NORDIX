@@ -48,6 +48,13 @@ const previousBrand = '<Logo/><span className="ml-2 hidden font-display text-xs 
 const newBrand = '<span className="inline-flex items-center gap-2.5 select-none"><span className="flex h-10 w-14 shrink-0 items-center justify-center rounded-xl bg-black"><img src={base+\'favicon.svg\'} className="h-8 w-10 object-contain" alt=""/></span><img data-testid="section-wordmark" src={pathname===\'/lab\'?labWordmark:academyWordmark} alt={pathname===\'/lab\'?\'LAB\':\'Academy\'} style={{height:28,width:\'auto\',maxWidth:\'min(150px,45vw)\',objectFit:\'contain\'}} /></span>'
 if (!header.includes(previousBrand)) throw new Error('Unexpected Academy brand layout')
 writeFileSync(headerPath, header.replace(oldOrder, newOrder).replace("import { Logo } from './Logo';", "import academyWordmark from '../assets/academy-wordmark.png';\nimport labWordmark from '../assets/lab-wordmark.png';").replace(previousBrand,newBrand))
+// Match the copyright typography and left alignment of the NORDIX closing screen.
+const appPath = join(work, 'src', 'App.tsx')
+const app = readFileSync(appPath, 'utf8')
+const oldFooter = '<footer className="border-t border-line px-6 py-8 text-center text-sm text-fog">© 2026 NORDIX · Учебные симуляции не заменяют профессиональный допуск.</footer>'
+const newFooter = '<footer className="border-t border-line" style={{padding:"24px 2% 16px",textAlign:"left"}}><small data-testid="academy-copyright" style={{fontFamily:"Unbounded, Arial, sans-serif",fontSize:"clamp(9px, .64vw, 12px)",fontWeight:800,lineHeight:1.4,letterSpacing:"-.035em",color:"#050505",whiteSpace:"nowrap"}}>© 2026 NORDIX</small></footer>'
+if (!app.includes(oldFooter)) throw new Error('Unexpected Academy footer layout')
+writeFileSync(appPath, app.replace(oldFooter, newFooter))
 reviseAcademy(work)
 cpSync(fridgeModel, join(work, 'src', 'components', 'lab', 'FridgeModel.tsx'))
 run('npm', ['ci', '--no-audit', '--no-fund'], work)
