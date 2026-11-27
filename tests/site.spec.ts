@@ -484,6 +484,8 @@ test('NORDIX wordmark parallax reverses with native wheel scrolling', async ({ p
 
 
 test('Academy is an independent page and Lab follows methodology when the archive is installed', async ({ page }) => {
+  // This end-to-end flow includes a WebGL scene and native fullscreen on CI software rendering.
+  test.setTimeout(90_000)
   await page.goto('/')
   await expect(page.locator('#navbar .nav-links a[href="#calculator"]')).toHaveCount(0)
   await expect(page.locator('#mobile-menu a[href="#calculator"]')).toHaveCount(0)
@@ -506,6 +508,7 @@ test('Academy is an independent page and Lab follows methodology when the archiv
   await expect(page.getByRole('tab', { name: 'Модель холодильника' })).toBeVisible()
   const model = page.getByTestId('fridge-3d')
   await expect(model).toBeVisible()
+  await expect(model.locator('canvas')).toBeVisible()
   const viewer = page.getByTestId('fridge-viewer')
   await page.getByRole('button', { name: 'На весь экран', exact: true }).click()
   await expect(viewer).toHaveAttribute('data-expanded', 'true')

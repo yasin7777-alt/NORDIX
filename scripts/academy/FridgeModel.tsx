@@ -60,7 +60,7 @@ export function FridgeModel(){
   const markerRefs=useRef<Partial<Record<PartId,HTMLButtonElement|null>>>({});
   const lineRefs=useRef<Partial<Record<PartId,SVGLineElement|null>>>({});
   const dotRefs=useRef<Partial<Record<PartId,SVGCircleElement|null>>>({});
-  const controller=useRef<{view:(v:View)=>void;select:(id:PartId)=>void;cutaway:(on:boolean)=>void}|null>(null);
+  const controller=useRef<{view:(v:View)=>void;select:(id:PartId)=>void;cutaway:(on:boolean)=>void;invalidate:()=>void}|null>(null);
   const part=PARTS.find(p=>p.id===selected)!;
   const choosePart=(id:PartId)=>{setSelected(id);if(id==='evaporator'||id==='thermostat'){setCutaway(true);controller.current?.view('front');}};
 
@@ -86,6 +86,7 @@ export function FridgeModel(){
     environment.dispose();pmrem.dispose();
     const camera=new THREE.PerspectiveCamera(36,1,.1,50);
     const controls=new OrbitControls(camera,renderer.domElement);
+    let invalidate=()=>{};
     controls.target.set(0,1.78,0);
     controls.enableDamping=true;
     controls.enablePan=false;
@@ -95,7 +96,7 @@ export function FridgeModel(){
     controls.maxPolarAngle=Math.PI*.51;
     const view=(v:View)=>{
       camera.position.copy(v==='front'?V(2.8,2.5,7.5):v==='back'?V(0,2.25,-8.1):V(2.6,2.8,-7.7));
-      controls.target.set(0,1.78,0); controls.update();
+      controls.target.set(0,1.78,0); controls.update();invalidate();
     };
     view('reset');
     scene.add(new THREE.HemisphereLight(0xffffff,0x92959a,2.0));
@@ -287,10 +288,11 @@ export function FridgeModel(){
       for(const [key,materials] of selectableMaterials)for(const m of materials){
         m.emissive.setHex(key===id?0x3d75d8:0x000000);m.emissiveIntensity=key===id?.65:0;
       }
+      invalidate();
     };
     let isCutaway=false;
-    const toggleCutaway=(on:boolean)=>{isCutaway=on;panel.opacity=on?.13:1;panel.depthWrite=!on;for(const o of rearCoverDetails)o.visible=!on;for(const o of doorParts)o.visible=!on;};
-    controller.current={view,select,cutaway:toggleCutaway};
+    const toggleCutaway=(on:boolean)=>{isCutaway=on;panel.opacity=on?.13:1;panel.depthWrite=!on;for(const o of rearCoverDetails)o.visible=!on;for(const o of doorParts)o.visible=!on;invalidate();};
+    controller.current={view,select,cutaway:toggleCutaway,invalidate:()=>invalidate()};
     select('compressor');
     const raycaster=new THREE.Raycaster();
     let down:{x:number;y:number}|null=null;
@@ -304,12 +306,17 @@ export function FridgeModel(){
     };
     renderer.domElement.addEventListener('pointerdown',pointerDown);
     renderer.domElement.addEventListener('pointerup',pointerUp);
-    const resize=()=>{const w=el.clientWidth,h=el.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);};
+    const resize=()=>{const w=el.clientWidth,h=el.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);invalidate();};
     const observer=new ResizeObserver(resize);observer.observe(el);resize();
     const projected=new THREE.Vector3();
     let frame=0;
+    let disposed=false;
+    // Render on demand: an idle refrigerator should consume no continuous GPU time.
+    // OrbitControls change events keep the animation alive during drag and damping.
     const render=()=>{
-      frame=requestAnimationFrame(render);controls.update();renderer.render(scene,camera);
+      frame=0;
+      if(disposed)return;
+      controls.update();renderer.render(scene,camera);
       const width=el.clientWidth,height=el.clientHeight;
       const left:{id:PartId;x:number;y:number}[]=[],right:{id:PartId;x:number;y:number}[]=[];
       for(const p of PARTS){
@@ -337,9 +344,12 @@ export function FridgeModel(){
           dot.setAttribute('cx',String(item.x));dot.setAttribute('cy',String(item.y));
         }
       }
-    };render();
+    };
+    invalidate=()=>{if(!disposed&&!frame)frame=requestAnimationFrame(render);};
+    controls.addEventListener('change',invalidate);
+    invalidate();
     return ()=>{
-      cancelAnimationFrame(frame);observer.disconnect();controls.dispose();
+      disposed=true;cancelAnimationFrame(frame);observer.disconnect();controls.removeEventListener('change',invalidate);controls.dispose();
       renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointerup',pointerUp);
       const materials=new Set<THREE.Material>();
       scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);}});
@@ -348,6 +358,7 @@ export function FridgeModel(){
   },[]);
   useEffect(()=>controller.current?.select(selected),[selected]);
   useEffect(()=>controller.current?.cutaway(cutaway),[cutaway]);
+  useEffect(()=>controller.current?.invalidate(),[labels,expanded,selected]);
   const changeView=(v:View)=>controller.current?.view(v);
   return (
     <div ref={viewer} data-testid="fridge-viewer" data-expanded={expanded} style={expanded?{position:'fixed',inset:0,zIndex:9999,background:'#dedede',padding:'clamp(12px,2vw,28px)',overflow:'auto',width:'100%',height:'100%',alignItems:'start'}:undefined} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
