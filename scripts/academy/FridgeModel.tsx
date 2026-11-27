@@ -366,7 +366,10 @@ export function FridgeModel(){
         const origin=id==='condenser'?V(-.43+i*.28,1.03+i*.29,-.97):V(-.49+i*.30,2.45,-.15);
         const dir=id==='condenser'?V(0,.12,-1).normalize():V(0,1,0);
         const arrow=new THREE.ArrowHelper(dir,origin,.35,0xf48a36,.10,.075);
-        arrow.line.material.depthTest=false;arrow.cone.material.depthTest=false;
+        for(const object of [arrow.line,arrow.cone]){
+          const list=Array.isArray(object.material)?object.material:[object.material];
+          for(const material of list){material.depthTest=false;material.depthWrite=false;}
+        }
         arrow.line.renderOrder=14;arrow.cone.renderOrder=14;flowRoot.add(arrow);heatArrows.push({id,origin,dir,arrow});
       }
     }
@@ -477,8 +480,14 @@ export function FridgeModel(){
       disposed=true;cancelAnimationFrame(frame);observer.disconnect();controls.removeEventListener('change',invalidate);controls.dispose();
       renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointerup',pointerUp);
       const materials=new Set<THREE.Material>();
-      scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);}});
-      for(const h of heatArrows){h.arrow.line.geometry.dispose();h.arrow.cone.geometry.dispose();h.arrow.line.material.dispose();h.arrow.cone.material.dispose();}
+      const geometries=new Set<THREE.BufferGeometry>();
+      scene.traverse(o=>{
+        if(o instanceof THREE.Mesh||o instanceof THREE.Line){
+          geometries.add(o.geometry);
+          for(const material of Array.isArray(o.material)?o.material:[o.material])materials.add(material);
+        }
+      });
+      geometries.forEach(g=>g.dispose());
       materials.forEach(m=>m.dispose());enamelTexture.dispose();shadowTexture.dispose();reflection.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null;
     };
   },[]);
