@@ -10,6 +10,8 @@ test('original page sections, six modules and primary navigation still exist', a
   await expect(page.locator('#faq')).toHaveCount(1)
   await expect(page.locator('#closing')).toHaveCount(1)
   await expect(page.locator('#courses-grid .course-card')).toHaveCount(6)
+  await expect(page.locator('#courses-grid .course-card button [data-lucide="arrow-right"]')).toHaveCount(6)
+  await expect(page.locator('#courses-grid .course-card button [data-lucide="plus"]')).toHaveCount(0)
   await expect(page.locator('#closing .closing-background')).toHaveAttribute('src', /nordix-closing-bg\.png$/)
   await expect(page.locator('#closing .closing-word-art')).toHaveAttribute('src', /nordix-closing-word\.png$/)
   await expect(page.locator('#closing .closing-background')).toHaveAttribute('draggable', 'false')

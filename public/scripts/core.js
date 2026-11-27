@@ -58,7 +58,7 @@
               <button onclick="openCourseCard(${c.id}, '${c.title}')" aria-label="${c.id === 1 && academyCourseUrl ? 'Начать курс' : 'Записаться'}" class="w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                 c.dark ? 'bg-n800 hover:bg-accent text-n0' : 'bg-n300 hover:bg-accent hover:text-n0 text-n900'
               }">
-                <i data-lucide="plus" class="w-5 h-5"></i>
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
               </button>
             </div>
           </article>
