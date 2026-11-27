@@ -1,11 +1,17 @@
 .nordix-intro {
-  position: fixed; inset: 0; z-index: 2147483646; overflow: hidden;
-  background: #050505; transform: translate3d(0,0,0);
+  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; margin: 0; padding: 0; z-index: 2147483646; overflow: hidden;
+  background: #000; transform: translate3d(0,0,0);
   transition: transform 850ms cubic-bezier(.65,0,.20,1);
   isolation: isolate;
 }
 .nordix-intro-closing { transform: translate3d(0,-100%,0); pointer-events: none; }
-.nordix-intro-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: center; pointer-events: none; }
+.nordix-intro > .nordix-intro-video {
+  position: absolute !important; inset: 0 !important; display: block !important;
+  width: 100% !important; height: 100% !important;
+  max-width: none !important; max-height: none !important;
+  min-width: 0; min-height: 0; margin: 0; padding: 0; border: 0;
+  object-fit: cover !important; object-position: center center !important; pointer-events: none;
+}
 .nordix-intro-skip { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; background: transparent; border: 0; padding: 0; cursor: pointer !important; }
 .nordix-intro-skip:focus-visible { outline: 2px solid #3D75D8; outline-offset: -4px; }
 .nordix-intro-sound {
@@ -17,8 +23,15 @@
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   color: #fff; text-align: left; font-family: Manrope, Arial, sans-serif; cursor: pointer !important;
 }
-.nordix-intro-sound:focus { outline: none; }
-.nordix-intro-sound:focus-visible { outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 5px 24px rgba(0,0,0,.24); }
+.nordix-intro .nordix-intro-sound:focus,
+.nordix-intro .nordix-intro-sound:focus-visible,
+.nordix-intro .nordix-intro-sound:active {
+  outline: none !important; outline-offset: 0 !important;
+  border-color: rgba(255,255,255,.15) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 5px 24px rgba(0,0,0,.24) !important;
+}
+.nordix-intro .nordix-intro-sound:focus-visible .nordix-intro-sound-copy strong { text-decoration: underline; text-underline-offset: 3px; }
+.nordix-intro:focus { outline: none !important; }
 .nordix-intro-speaker { display:grid; place-items:center; width:30px; height:30px; border:1px solid rgba(255,255,255,.13); border-radius:50%; color:#6097ff; }
 .nordix-intro-sound-copy { display:flex; flex-direction:column; line-height:1.3; min-width:104px; }
 .nordix-intro-sound-copy > span { font-size:10px; color:rgba(255,255,255,.63); font-weight:600; }

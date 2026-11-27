@@ -14,7 +14,7 @@ export function Intro() {
   const [closing, setClosing] = useState(false)
   const [muted, setMuted] = useState(true)
   const video = useRef<HTMLVideoElement>(null)
-  const sound = useRef<HTMLButtonElement>(null)
+  const overlay = useRef<HTMLDivElement>(null)
   const closingRef = useRef(false)
   const dismissTimer = useRef<number | undefined>(undefined)
   const finish = () => setVisible(false)
@@ -33,7 +33,7 @@ export function Intro() {
     document.body.style.overflow = 'hidden'
     const player = video.current
     const previousFocus = document.activeElement
-    sound.current?.focus({ preventScroll: true })
+    overlay.current?.focus({ preventScroll: true })
     let startupTimer: number | undefined
     const started = () => window.clearTimeout(startupTimer)
     const onKey = (event: KeyboardEvent) => {
@@ -73,10 +73,10 @@ export function Intro() {
 
   if (!visible) return null
   return createPortal(
-    <div className={'nordix-intro'+(closing?' nordix-intro-closing':'')} data-testid="nordix-intro" data-phase={closing?'closing':'playing'} role="dialog" aria-modal="true" aria-label="Вступление NORDIX" onTransitionEnd={event=>{if(event.target===event.currentTarget&&event.propertyName==='transform'&&closing)finish()}}>
-      <video ref={video} className="nordix-intro-video" src={source} autoPlay muted={muted} playsInline preload="auto" onEnded={close} onError={close} />
+    <div ref={overlay} tabIndex={-1} className={'nordix-intro'+(closing?' nordix-intro-closing':'')} data-testid="nordix-intro" data-phase={closing?'closing':'playing'} role="dialog" aria-modal="true" aria-label="Вступление NORDIX" onTransitionEnd={event=>{if(event.target===event.currentTarget&&event.propertyName==='transform'&&closing)finish()}}>
+      <video ref={video} className="nordix-intro-video" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} src={source} autoPlay muted={muted} playsInline preload="auto" onEnded={close} onError={close} />
       <button type="button" className="nordix-intro-skip" onClick={close} aria-label="Пропустить вступление" disabled={closing}/>
-      <button type="button" ref={sound} data-testid="intro-sound" className="nordix-intro-sound" onClick={()=>void toggleSound()} disabled={closing} aria-pressed={!muted} aria-label={muted?'Включить звук':'Выключить звук'}>
+      <button type="button" data-testid="intro-sound" className="nordix-intro-sound" onClick={()=>void toggleSound()} disabled={closing} aria-pressed={!muted} aria-label={muted?'Включить звук':'Выключить звук'}>
         <span className="nordix-intro-speaker" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/>{muted?<path d="m16 9 5 6m0-6-5 6"/>:<><path d="M15 9a4 4 0 0 1 0 6"/><path d="M18 6a8 8 0 0 1 0 12"/></>}</svg>
         </span>

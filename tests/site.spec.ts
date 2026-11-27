@@ -643,7 +643,18 @@ test('NORDIX intro supports sound, click to skip, and upward curtain at video en
   const player=overlay.locator('video')
   await expect(player).toHaveAttribute('src','/NORDIX/videos/nordix-intro.mp4')
   await expect.poll(()=>player.evaluate((v:HTMLVideoElement)=>v.readyState)).toBeGreaterThan(0)
-  await expect(page.getByTestId('intro-sound')).toHaveAttribute('aria-pressed','false')
+  for (const size of [{width:1920,height:1080},{width:1792,height:855}]) {
+    await page.setViewportSize(size)
+    await expect(player).toHaveCSS('object-fit','cover')
+    await expect.poll(async () => {
+      const box=await player.boundingBox()
+      return !!box && Math.abs(box.width-size.width)<1 && Math.abs(box.height-size.height)<1 && Math.abs(box.x)<1 && Math.abs(box.y)<1
+    }).toBe(true)
+  }
+  const sound=page.getByTestId('intro-sound')
+  await sound.focus()
+  await expect(sound).toHaveCSS('outline-style','none')
+  await expect(sound).toHaveAttribute('aria-pressed','false')
   await page.getByTestId('intro-sound').click()
   await expect(page.getByTestId('intro-sound')).toHaveAttribute('aria-pressed','true')
   await expect(overlay).toBeVisible()
