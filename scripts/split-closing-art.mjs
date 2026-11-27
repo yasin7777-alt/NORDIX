@@ -45,6 +45,19 @@ for (const [left,top,right,bottom] of boxes) {
     }
   }
 }
-writeFileSync('public/nordix-closing-bg.png', PNG.sync.write(background))
-writeFileSync('public/nordix-closing-word.png', PNG.sync.write(word))
+// Verify that the lower tip of the original drip is actually present on the moving
+// layer, and no dark duplicate survives on the fixed layer.
+let dripPixels = 0
+for (let y = 770; y < 814; y++) {
+  const sample = (y * width + 950) * 4
+  for (let x = 985; x < 1070; x++) {
+    const i = (y * width + x) * 4
+    if (word.data[i+3] > 128) dripPixels++
+    if (background.data[i] !== data[sample]) throw new Error('Residual drip on fixed background')
+  }
+}
+if (dripPixels < 20) throw new Error('Original D drip missing from moving artwork')
+console.log('Verified original drip:', dripPixels, 'opaque pixels in lower tip')
+writeFileSync('public/nordix-closing-bg-drip-restored.png', PNG.sync.write(background))
+writeFileSync('public/nordix-closing-word-drip-restored.png', PNG.sync.write(word))
 console.log('Prepared NORDIX parallax wordmark from original artwork')

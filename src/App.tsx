@@ -97,8 +97,8 @@ function Closing() {
     }
   }, [])
   return <LegacyMarkup html={closing
-    .replace('__NORDIX_CLOSING_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-bg.png')
-    .replace('__NORDIX_WORD_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-word.png')} />
+    .replace('__NORDIX_CLOSING_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-bg-drip-restored.png')
+    .replace('__NORDIX_WORD_IMAGE__', import.meta.env.BASE_URL + 'nordix-closing-word-drip-restored.png')} />
 }
 function Modals() { return <LegacyMarkup html={modals} /> }
 
