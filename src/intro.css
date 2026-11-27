@@ -5,7 +5,7 @@
   isolation: isolate;
 }
 .nordix-intro-closing { transform: translate3d(0,-100%,0); pointer-events: none; }
-.nordix-intro-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.nordix-intro-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: center; pointer-events: none; }
 .nordix-intro-skip { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; background: transparent; border: 0; padding: 0; cursor: pointer !important; }
 .nordix-intro-skip:focus-visible { outline: 2px solid #3D75D8; outline-offset: -4px; }
 .nordix-intro-sound {
