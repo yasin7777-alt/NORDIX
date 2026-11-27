@@ -573,3 +573,26 @@ test('Academy bottom navigation follows learning stages and records passed resul
   await expect(page.getByRole('heading', {name:'Как работает холодильник',exact:true})).toBeVisible()
   await expect(next).toContainText('Видео')
 })
+
+
+test('Academy component lessons provide separate interactive 3D viewers', async ({ page }) => {
+  test.setTimeout(120_000)
+  await page.goto('/')
+  if (!(await page.locator('#courses-grid').getAttribute('data-academy-url'))) return
+  await page.locator('#courses-grid .course-card').first().getByRole('button', { name: 'Начать обучение' }).click()
+  await expect(page).toHaveURL(/academy\/#\/learn\/course-1\/c1-l1$/)
+  const first = page.url()
+  await expect(page.getByTestId('lesson-part-model')).toHaveCount(0)
+  for (const [number,kind] of [[4,'compressor'],[5,'condenser'],[6,'evaporator'],[8,'valve']] as const) {
+    await page.goto(first.replace(/c1-l1$/, 'c1-l'+number))
+    const viewer = page.getByTestId('lesson-part-viewer')
+    await expect(viewer).toHaveAttribute('data-kind',kind)
+    await expect(viewer.locator('canvas')).toBeVisible()
+  }
+  const viewer = page.getByTestId('lesson-part-viewer')
+  await viewer.getByRole('button',{name:'Корпус вентиля',exact:true}).click()
+  await expect(viewer.getByRole('button',{name:'Корпус вентиля',exact:true})).toHaveAttribute('aria-pressed','true')
+  await page.getByTestId('lesson-part-model').getByRole('button',{name:'Капиллярная трубка',exact:true}).click()
+  await expect(viewer).toHaveAttribute('data-kind','capillary')
+  await expect(viewer.locator('canvas')).toBeVisible()
+})

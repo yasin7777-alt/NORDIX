@@ -20,7 +20,7 @@ if (!existsSync(archive)) {
   console.log('Academy archive not installed; existing NORDIX remains unchanged.')
   process.exit(0)
 }
-const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).update(readFileSync(join(root,'scripts','academy-editorial.mjs'))).update(readFileSync(fridgeModel)).update(readFileSync(join(root,'scripts','academy','lesson-navigation.mjs'))).update(readFileSync(join(root,'scripts','academy','Header.tsx'))).update(readFileSync(join(root,'scripts','academy','academy-navigation.css'))).update(readFileSync(join(root,'scripts','academy','academy-wordmark.png'))).update(readFileSync(join(root,'scripts','academy','lab-wordmark.png'))).digest('hex')
+const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).update(readFileSync(join(root,'scripts','academy-editorial.mjs'))).update(readFileSync(fridgeModel)).update(readFileSync(join(root,'scripts','academy','LessonPartModel.tsx'))).update(readFileSync(join(root,'scripts','academy','lesson-navigation.mjs'))).update(readFileSync(join(root,'scripts','academy','Header.tsx'))).update(readFileSync(join(root,'scripts','academy','academy-navigation.css'))).update(readFileSync(join(root,'scripts','academy','academy-wordmark.png'))).update(readFileSync(join(root,'scripts','academy','lab-wordmark.png'))).digest('hex')
 const stamp = join(work, 'archive.sha256')
 if (existsSync(stamp) && readFileSync(stamp, 'utf8') === hash && existsSync(join(output, 'index.html'))) {
   ready(true)
@@ -51,6 +51,13 @@ const newFooter = '<footer className="border-t border-line" style={{padding:"24p
 if (!app.includes(oldFooter)) throw new Error('Unexpected Academy footer layout')
 writeFileSync(appPath, app.replace(oldFooter, newFooter))
 reviseAcademy(work)
+// Insert independent, interactive component models in the theory of lessons 4, 5, 6 and 8.
+const theoryPath = join(work,'src','components','lesson','TheoryStage.tsx')
+const theory = readFileSync(theoryPath,'utf8')
+const figureEnd = '</figure>'
+if (!theory.includes(figureEnd)) throw new Error('Theory illustration anchor missing')
+writeFileSync(theoryPath, "import { LessonPartModel } from './LessonPartModel';\n" + theory.replace(figureEnd, figureEnd+'\n      <LessonPartModel lessonId={lesson.id} />'))
+cpSync(join(root,'scripts','academy','LessonPartModel.tsx'),join(work,'src','components','lesson','LessonPartModel.tsx'))
 reviseLessonNavigation(work)
 cpSync(fridgeModel, join(work, 'src', 'components', 'lab', 'FridgeModel.tsx'))
 run('npm', ['ci', '--no-audit', '--no-fund'], work)
