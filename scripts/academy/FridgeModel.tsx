@@ -68,10 +68,10 @@ export function FridgeModel(){
     const el=host.current;
     if(!el)return;
     let renderer:THREE.WebGLRenderer;
-    try { renderer=new THREE.WebGLRenderer({antialias:true,alpha:false}); }
+    try { renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); }
     catch { setAvailable(false); return; }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-    renderer.setClearColor(0xf5f4f2,1);
+    renderer.setClearColor(0x000000,0);
     renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.toneMapping=THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure=1.05;
@@ -273,7 +273,16 @@ export function FridgeModel(){
     box(.30,.18,.29,.53,3.34,.42,inner,'thermostat');
     cylinder(.09,.075,V(.53,3.31,.55),V(.53,3.31,.625),rubber,'thermostat');
     box(.022,.065,.008,.53,3.33,.666,steel,'thermostat');
-    const floor=mesh(new THREE.CircleGeometry(2.3,64),mat(0xe3e1de,0,.95),V(0,-.03,0));floor.rotation.x=-Math.PI/2;
+    // Soft contact shadow without a visible circular platform, as in the reference viewer.
+    const shadowCanvas=document.createElement('canvas');shadowCanvas.width=256;shadowCanvas.height=256;
+    const shadowCtx=shadowCanvas.getContext('2d')!;
+    const gradient=shadowCtx.createRadialGradient(128,128,15,128,128,128);
+    gradient.addColorStop(0,'rgba(0,0,0,0.30)');gradient.addColorStop(.48,'rgba(0,0,0,0.14)');gradient.addColorStop(1,'rgba(0,0,0,0)');
+    shadowCtx.fillStyle=gradient;shadowCtx.fillRect(0,0,256,256);
+    const shadowTexture=new THREE.CanvasTexture(shadowCanvas);
+    const shadowMaterial=new THREE.MeshBasicMaterial({map:shadowTexture,transparent:true,depthWrite:false});
+    const floor=new THREE.Mesh(new THREE.PlaneGeometry(3.5,3.0),shadowMaterial);
+    floor.position.set(0,-.025,0);floor.rotation.x=-Math.PI/2;scene.add(floor);
     const select=(id:PartId)=>{
       for(const [key,materials] of selectableMaterials)for(const m of materials){
         m.emissive.setHex(key===id?0x3d75d8:0x000000);m.emissiveIntensity=key===id?.65:0;
@@ -334,14 +343,14 @@ export function FridgeModel(){
       renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointerup',pointerUp);
       const materials=new Set<THREE.Material>();
       scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);}});
-      materials.forEach(m=>m.dispose());enamelTexture.dispose();reflection.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null;
+      materials.forEach(m=>m.dispose());enamelTexture.dispose();shadowTexture.dispose();reflection.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null;
     };
   },[]);
   useEffect(()=>controller.current?.select(selected),[selected]);
   useEffect(()=>controller.current?.cutaway(cutaway),[cutaway]);
   const changeView=(v:View)=>controller.current?.view(v);
   return (
-    <div ref={viewer} data-testid="fridge-viewer" data-expanded={expanded} style={expanded?{position:'fixed',inset:0,zIndex:9999,background:'#f5f4f2',padding:'clamp(12px,2vw,28px)',overflow:'auto',width:'100%',height:'100%',alignItems:'start'}:undefined} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+    <div ref={viewer} data-testid="fridge-viewer" data-expanded={expanded} style={expanded?{position:'fixed',inset:0,zIndex:9999,background:'#dedede',padding:'clamp(12px,2vw,28px)',overflow:'auto',width:'100%',height:'100%',alignItems:'start'}:undefined} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       <div className="overflow-hidden rounded-2xl border border-line bg-steel p-3 sm:p-4">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <span className="mr-auto text-xs font-extrabold uppercase tracking-widest text-accent">3D · Интерактив</span>
@@ -351,7 +360,7 @@ export function FridgeModel(){
           <button type="button" className={buttonStyle} onClick={()=>setLabels(v=>!v)} aria-pressed={labels}>Подписи</button>
           <button type="button" className={buttonStyle+' inline-flex items-center gap-1.5'} onClick={toggleFullscreen} aria-pressed={expanded} aria-label={expanded?'Выйти из полноэкранного режима':'На весь экран'}>{expanded?<Minimize size={16}/>:<Maximize size={16}/>}<span>{expanded?'Свернуть':'На весь экран'}</span></button>
         </div>
-        <div ref={host} data-testid="fridge-3d" style={expanded?{height:'max(360px,calc(100dvh - 160px))'}:undefined} className="relative isolate h-[480px] overflow-hidden rounded-xl border border-line bg-[#f5f4f2] sm:h-[560px]">
+        <div ref={host} data-testid="fridge-3d" style={{background:'radial-gradient(ellipse at 50% 42%, #dedede 0%, #bfc0c1 53%, #77797c 100%)',...(expanded?{height:'max(360px,calc(100dvh - 160px))'}:{})}} className="relative isolate h-[480px] overflow-hidden rounded-xl border border-line sm:h-[560px]">
           {available && labels && <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-[5] h-full w-full overflow-hidden">
             {PARTS.map(p=><g key={p.id}><line ref={node=>{lineRefs.current[p.id]=node;}} stroke={selected===p.id?'#3D75D8':'#656b72'} strokeWidth={selected===p.id?2:1.2}/><circle ref={node=>{dotRefs.current[p.id]=node;}} r="4" fill={selected===p.id?'#3D75D8':'#fff'} stroke="#3D75D8" strokeWidth="1.5"/></g>)}
           </svg>}
