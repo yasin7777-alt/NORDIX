@@ -28,7 +28,7 @@ function LegacyMarkup({ html }: { html: string }) {
 function Cursor() { return <LegacyMarkup html={cursor} /> }
 const academyUrl = import.meta.env.BASE_URL + 'academy/'
 function Header() { return <LegacyMarkup html={header.replace('<!-- ACADEMY_LAB_LINK -->', academyReady ? '<a href="' + academyUrl + '#/lab" class="text-base font-bold text-n800 hover:text-accent transition-colors">Лаборатория</a>' : '')} /> }
-function MobileMenu() { return <LegacyMarkup html={mobileMenu.replace('<!-- ACADEMY_LAB_LINK -->', academyReady ? '<a href="' + academyUrl + '#/lab" class="mobile-link font-display text-4xl font-bold hover:text-semantic transition-colors">05 / Лаборатория</a>' : '')} /> }
+function MobileMenu() { return <LegacyMarkup html={mobileMenu.replace('<!-- ACADEMY_LAB_LINK -->', academyReady ? '<a href="' + academyUrl + '#/lab" class="mobile-link font-display text-4xl font-bold hover:text-semantic transition-colors">04 / Лаборатория</a>' : '').replace('05 / FAQ', academyReady ? '05 / FAQ' : '04 / FAQ')} /> }
 function Hero() {
   useEffect(() => {
     const video = document.querySelector<HTMLVideoElement>('#hero .nordix-hero-video-player')
