@@ -2,7 +2,7 @@
 (() => {
   const root = new URL('../', document.currentScript.src);
   const key = 'nordix-route-curtain-v1';
-  const artwork = new URL('nordix-transition-v2.webp', root).href;
+  const artwork = new URL(window.nordixCurtainArtwork || 'nordix-transition-v2.webp', root).href;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const preload = new Image();
   preload.src = artwork;
@@ -18,7 +18,7 @@
     Object.assign(panel.style, {
       position:'fixed', inset:'0', width:'100vw', height:'100dvh', zIndex:'2147483647',
       backgroundColor:'#000', backgroundImage:'url("' + artwork + '")',
-      backgroundSize:'cover', backgroundPosition:'center', backgroundRepeat:'no-repeat',
+      backgroundSize:'contain', backgroundPosition:'center', backgroundRepeat:'no-repeat',
       transform:'translate3d(0,0,0)', margin:'0', pointerEvents:'auto',
       touchAction:'none', willChange:'transform'
     });

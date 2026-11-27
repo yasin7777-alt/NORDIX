@@ -13,6 +13,9 @@ const work = join(root, '.academy-build')
 const output = join(root, 'public', 'academy')
 const generated = join(root, 'src', 'generated')
 mkdirSync(generated, { recursive: true })
+// Prefer the original PNG without resizing or recompressing it.
+const curtainArtwork = existsSync(join(root,'public','nordix-transition-original.png')) ? 'nordix-transition-original.png' : 'nordix-transition-v2.webp'
+writeFileSync(join(root,'public','scripts','route-curtain-artwork.js'), 'window.nordixCurtainArtwork = '+JSON.stringify(curtainArtwork)+';\n')
 // Enable the intro only when the actual user-supplied MP4 is present.
 writeFileSync(join(generated, 'intro-ready.ts'), 'export const introReady = ' + existsSync(join(root, 'public', 'videos', 'nordix-intro.mp4')) + '\n')
 const ready = value => writeFileSync(join(generated, 'academy-ready.ts'), 'export const academyReady = ' + value + '\n')
@@ -49,7 +52,7 @@ for (const file of ['Header.tsx','academy-navigation.css']) {
 const academyIndex = join(work,'index.html')
 const academyHtml = readFileSync(academyIndex,'utf8')
 if (!academyHtml.includes('</head>')) throw new Error('Academy head missing')
-writeFileSync(academyIndex, academyHtml.replace('</head>', '<script src="/NORDIX/scripts/route-curtain.js"></script>\n</head>'))
+writeFileSync(academyIndex, academyHtml.replace('</head>', '<script src="/NORDIX/scripts/route-curtain-artwork.js"></script><script src="/NORDIX/scripts/route-curtain.js"></script>\n</head>'))
 const appPath = join(work, 'src', 'App.tsx')
 const app = readFileSync(appPath, 'utf8')
 const oldFooter = '<footer className="border-t border-line px-6 py-8 text-center text-sm text-fog">© 2026 NORDIX · Учебные симуляции не заменяют профессиональный допуск.</footer>'

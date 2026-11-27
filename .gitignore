@@ -6,3 +6,5 @@ public/videos/nordix-hero-4k.mp4
 .academy-build/
 public/academy/
 src/generated/
+
+public/scripts/route-curtain-artwork.js

@@ -678,7 +678,8 @@ test('NORDIX course and Lab transitions share a left-to-right branded curtain', 
   const curtain=page.getByTestId('nordix-route-curtain')
   await page.locator('#hero a[href="#directions"]').click()
   await expect(curtain).toHaveAttribute('data-phase','entering')
-  await expect(curtain).toHaveCSS('background-image',/nordix-transition-v2\.webp/)
+  await expect(curtain).toHaveCSS('background-image',/nordix-transition-(original\.png|v2\.webp)/)
+  await expect(curtain).toHaveCSS('background-size','contain')
   await expect(curtain).toHaveCount(0)
   const grid=page.locator('#courses-grid')
   if (!(await grid.getAttribute('data-academy-url'))) return
