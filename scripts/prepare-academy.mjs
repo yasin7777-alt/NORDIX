@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
+import { reviseAcademy } from './academy-editorial.mjs'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const archive = join(root, 'academy-import.zip')
 const work = join(root, '.academy-build')
@@ -17,7 +18,7 @@ if (!existsSync(archive)) {
   console.log('Academy archive not installed; existing NORDIX remains unchanged.')
   process.exit(0)
 }
-const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).digest('hex')
+const hash = createHash('sha256').update(readFileSync(archive)).update(readFileSync(fileURLToPath(import.meta.url))).update(readFileSync(join(root,'scripts','academy-editorial.mjs'))).digest('hex')
 const stamp = join(work, 'archive.sha256')
 if (existsSync(stamp) && readFileSync(stamp, 'utf8') === hash && existsSync(join(output, 'index.html'))) {
   ready(true)
@@ -39,6 +40,7 @@ const oldOrder = "{to:'/progress',label:'Мой прогресс'}, {to:'/lab',l
 const newOrder = "{to:'/lab',label:'Лаборатория'}, {to:'/progress',label:'Мой прогресс'}"
 if (!header.includes(oldOrder) && !header.includes(newOrder)) throw new Error('Unexpected Academy navigation layout')
 writeFileSync(headerPath, header.replace(oldOrder, newOrder))
+reviseAcademy(work)
 run('npm', ['ci', '--no-audit', '--no-fund'], work)
 run('npm', ['run', 'test'], work)
 run('npm', ['run', 'build'], work)
