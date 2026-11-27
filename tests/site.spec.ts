@@ -583,11 +583,29 @@ test('Academy component lessons provide separate interactive 3D viewers', async 
   await expect(page).toHaveURL(/academy\/#\/learn\/course-1\/c1-l1$/)
   const first = page.url()
   await expect(page.getByTestId('lesson-part-model')).toHaveCount(0)
+  const checkFullscreen = async () => {
+    const viewer = page.getByTestId('lesson-part-viewer')
+    await viewer.getByRole('button',{name:'На весь экран',exact:true}).click()
+    await expect(viewer).toHaveAttribute('data-expanded','true')
+    await expect(viewer.getByTestId('part-viewer-title')).toBeHidden()
+    const scene = viewer.getByTestId('part-viewer-scene')
+    const details = viewer.getByTestId('part-viewer-details')
+    await expect(scene.locator('canvas')).toBeVisible()
+    await expect(details).toBeVisible()
+    await expect.poll(async () => {
+      const a = await scene.boundingBox(), b = await details.boundingBox()
+      return !!a && !!b && a.height > b.height && Math.abs(a.y+a.height-b.y)<3
+    }).toBe(true)
+    await viewer.getByRole('button',{name:'Свернуть',exact:true}).click()
+    await expect(viewer).toHaveAttribute('data-expanded','false')
+    await expect(viewer.getByTestId('part-viewer-title')).toBeVisible()
+  }
   for (const [number,kind] of [[4,'compressor'],[5,'condenser'],[6,'evaporator'],[8,'valve']] as const) {
     await page.goto(first.replace(/c1-l1$/, 'c1-l'+number))
     const viewer = page.getByTestId('lesson-part-viewer')
     await expect(viewer).toHaveAttribute('data-kind',kind)
     await expect(viewer.locator('canvas')).toBeVisible()
+    await checkFullscreen()
   }
   const viewer = page.getByTestId('lesson-part-viewer')
   await viewer.getByRole('button',{name:'Корпус вентиля',exact:true}).click()
@@ -595,4 +613,5 @@ test('Academy component lessons provide separate interactive 3D viewers', async 
   await page.getByTestId('lesson-part-model').getByRole('button',{name:'Капиллярная трубка',exact:true}).click()
   await expect(viewer).toHaveAttribute('data-kind','capillary')
   await expect(viewer.locator('canvas')).toBeVisible()
+  await checkFullscreen()
 })

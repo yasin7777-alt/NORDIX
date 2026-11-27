@@ -118,6 +118,29 @@ function PartViewer({kind}:{kind:Kind}){
  const [available,setAvailable]=useState(true);
  const host=useRef<HTMLDivElement>(null), outer=useRef<HTMLElement>(null);
  const controller=useRef<{select:(id:number)=>void;reset:()=>void}|null>(null);
+ const nativeFullscreen=useRef(false);
+ const fullscreenButton=useRef<HTMLButtonElement>(null);
+ const toggleFullscreen=()=>{
+   const element=outer.current;
+   if(!element)return;
+   if(expanded){
+     setExpanded(false);
+     if(document.fullscreenElement===element)void document.exitFullscreen().catch(()=>{});
+     return;
+   }
+   setExpanded(true);
+   if(element.requestFullscreen)void element.requestFullscreen().then(()=>{
+     nativeFullscreen.current=document.fullscreenElement===element;
+   }).catch(()=>{});
+ };
+ useEffect(()=>{
+   const onChange=()=>{
+     if(document.fullscreenElement===outer.current){nativeFullscreen.current=true;setExpanded(true);}
+     else if(nativeFullscreen.current){nativeFullscreen.current=false;setExpanded(false);}
+   };
+   document.addEventListener('fullscreenchange',onChange);
+   return()=>document.removeEventListener('fullscreenchange',onChange);
+ },[]);
  const data=catalog[kind];
  useEffect(()=>{
    const el=host.current;if(!el)return;
@@ -150,19 +173,43 @@ function PartViewer({kind}:{kind:Kind}){
    return ()=>{disposed=true;cancelAnimationFrame(frame);ro.disconnect();controls.removeEventListener('change',invalidate);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);model.root.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();(o.material as THREE.Material).dispose();}});reflection.dispose();renderer.dispose();renderer.domElement.remove();controller.current=null;};
  },[kind,data.title]);
  useEffect(()=>controller.current?.select(selected),[selected]);
- useEffect(()=>{if(!expanded)return;const old=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setExpanded(false);};window.addEventListener('keydown',key);return()=>{window.removeEventListener('keydown',key);document.body.style.overflow=old;};},[expanded]);
- return <section ref={outer} data-testid="lesson-part-viewer" data-kind={kind} className="rounded-2xl border border-line bg-steel p-4" style={expanded?{position:'fixed',inset:0,zIndex:10000,overflow:'auto',borderRadius:0,background:'#f3f2ef',padding:'clamp(12px,2vw,30px)'}:undefined}>
-   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-     <div><h3 className="font-display text-lg font-bold text-paper">{data.title}</h3><p className="mt-1 text-xs text-fog">{data.desc}</p></div>
-     <div className="flex flex-wrap gap-2"><button type="button" className={btn} onClick={()=>{setSelected(-1);controller.current?.reset();}}><RotateCcw size={14} className="mr-1 inline"/>Сброс</button><button type="button" className={btn} aria-pressed={expanded} onClick={()=>setExpanded(v=>!v)}>{expanded?<Minimize size={14} className="mr-1 inline"/>:<Maximize size={14} className="mr-1 inline"/>}{expanded?'Свернуть':'На весь экран'}</button></div>
+ useEffect(()=>{
+   if(!expanded)return;
+   const old=document.body.style.overflow;
+   document.body.style.overflow='hidden';
+   document.body.classList.add('nordix-isolated-part-view');
+   const key=(e:KeyboardEvent)=>{
+     if(e.key==='Escape'){
+       setExpanded(false);
+       if(document.fullscreenElement===outer.current)void document.exitFullscreen().catch(()=>{});
+     }
+   };
+   window.addEventListener('keydown',key);
+   fullscreenButton.current?.focus({preventScroll:true});
+   return()=>{
+     window.removeEventListener('keydown',key);
+     document.body.style.overflow=old;
+     document.body.classList.remove('nordix-isolated-part-view');
+   };
+ },[expanded]);
+ return <section ref={outer} data-testid="lesson-part-viewer" data-kind={kind} data-expanded={expanded} aria-label="Просмотр 3D-детали" role={expanded?'dialog':undefined} aria-modal={expanded?true:undefined} className="rounded-2xl border border-line bg-steel p-4" style={expanded?{position:'fixed',inset:0,zIndex:2147483647,display:'grid',gridTemplateRows:'minmax(0,1fr) auto',gap:0,margin:0,padding:0,border:0,borderRadius:0,width:'100%',height:'100%',maxWidth:'none',maxHeight:'none',overflow:'hidden',background:'#f3f2ef',visibility:'visible'}:undefined}>
+   {expanded&&<style>{'body.nordix-isolated-part-view { visibility: hidden; } body.nordix-isolated-part-view [data-testid="lesson-part-viewer"][data-expanded="true"] { visibility: visible; }'}</style>}
+   <div className="mb-3 flex flex-wrap items-center justify-between gap-3" style={expanded?{position:'absolute',top:0,right:0,zIndex:5,margin:0,padding:'clamp(10px,1.4vw,22px)'}:undefined}>
+     <div data-testid="part-viewer-title" hidden={expanded}><h3 className="font-display text-lg font-bold text-paper">{data.title}</h3><p className="mt-1 text-xs text-fog">{data.desc}</p></div>
+     <div className="flex flex-wrap gap-2">
+       <button type="button" className={btn} onClick={()=>{setSelected(-1);controller.current?.reset();}}><RotateCcw size={14} className="mr-1 inline"/>Сброс</button>
+       <button ref={fullscreenButton} type="button" className={btn} aria-pressed={expanded} onClick={toggleFullscreen}>{expanded?<Minimize size={14} className="mr-1 inline"/>:<Maximize size={14} className="mr-1 inline"/>}{expanded?'Свернуть':'На весь экран'}</button>
+     </div>
    </div>
-   <div ref={host} className="relative overflow-hidden rounded-xl border border-line" style={{height:expanded?'max(320px,calc(100dvh - 280px))':'clamp(280px,42vw,440px)',background:'radial-gradient(ellipse at 50% 42%, #dedede 0%, #bfc0c1 53%, #77797c 100%)'}}>
+   <div ref={host} data-testid="part-viewer-scene" className="relative overflow-hidden rounded-xl border border-line" style={{height:expanded?'100%':'clamp(280px,42vw,440px)',minHeight:0,background:'radial-gradient(ellipse at 50% 42%, #dedede 0%, #bfc0c1 53%, #77797c 100%)',...(expanded?{border:0,borderRadius:0,width:'100%'}:{})}}>
      {!available&&<p className="grid h-full place-items-center p-6 text-center text-sm">3D недоступно в этом браузере. Ниже доступны названия деталей и их назначение.</p>}
    </div>
-   <p className="my-3 text-xs text-fog">Вращайте мышью, приближайте колесом или жестом. Нажмите на деталь или название, чтобы выделить её.</p>
-   <div className="flex flex-wrap gap-2">{data.details.map((d,i)=><button key={d.name} type="button" aria-pressed={selected===i} onClick={()=>setSelected(selected===i?-1:i)} className={btn+(selected===i?' !border-accent !bg-accent !text-white':'')}>{d.name}</button>)}</div>
-   <p aria-live="polite" className="mt-3 min-h-10 text-sm text-silver">{selected>=0?data.details[selected]?.info:'Выберите компонент, чтобы увидеть его назначение.'}</p>
-   <p className="mt-2 text-xs text-fog">Учебная 3D-реконструкция типовой детали, не заводская CAD-модель. Форма и пропорции могут отличаться у разных производителей.</p>
+   <div data-testid="part-viewer-details" style={expanded?{background:'#fafafa',borderTop:'1px solid #d0ceca',padding:'clamp(12px,2vw,28px)',minHeight:'min(17dvh,120px)',maxHeight:'42dvh',overflowY:'auto',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center'}:undefined}>
+     {!expanded&&<p className="my-3 text-xs text-fog">Вращайте мышью, приближайте колесом или жестом. Нажмите на деталь или название, чтобы выделить её.</p>}
+     <div className={'flex flex-wrap gap-2'+(expanded?' justify-center':'')}>{data.details.map((d,i)=><button key={d.name} type="button" aria-pressed={selected===i} onClick={()=>setSelected(selected===i?-1:i)} className={btn+(selected===i?' !border-accent !bg-accent !text-white':'')}>{d.name}</button>)}</div>
+     <p aria-live="polite" className={'mt-3 text-sm text-silver'+(expanded?' text-center':' min-h-10')}>{selected>=0?data.details[selected]?.info:'Выберите компонент, чтобы увидеть его назначение.'}</p>
+     {!expanded&&<p className="mt-2 text-xs text-fog">Учебная 3D-реконструкция типовой детали, не заводская CAD-модель. Форма и пропорции могут отличаться у разных производителей.</p>}
+   </div>
  </section>;
 }
 export function LessonPartModel({lessonId}:{lessonId:string}){
